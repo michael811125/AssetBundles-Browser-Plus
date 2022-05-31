@@ -106,13 +106,7 @@ namespace AssetBundleBrowser
 
         internal void OnGUI(Rect pos)
         {
-            if (AssetBundleBrowserMain.instance.DataSourceCount == 0)
-            {
-                GUI.enabled = false;
-                return;
-            }
-
-            GUI.enabled = true;
+            if (AssetBundleBrowserMain.instance.DataSourceCount == 0) return;
 
             m_Position = pos;
 
@@ -145,6 +139,7 @@ namespace AssetBundleBrowser
 
             HandleHorizontalResize();
             HandleVerticalResize();
+
 
             if (AssetBundleModel.Model.BundleListIsEmpty())
             {

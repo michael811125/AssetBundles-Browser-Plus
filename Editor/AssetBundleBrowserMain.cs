@@ -57,7 +57,7 @@ namespace AssetBundleBrowser
         [SerializeField]
         internal bool multiDataSource = false;
         List<AssetBundleDataSource.ABDataSource> m_DataSourceList = null;
-        public int DataSourceCount { get { return m_DataSourceList.Count; } }
+        internal int DataSourceCount { get { return m_DataSourceList.Count; } }
 
         public virtual void AddItemsToMenu(GenericMenu menu)
         {
@@ -200,7 +200,7 @@ namespace AssetBundleBrowser
                     GUILayout.Label("Bundle Data Source:");
                     GUILayout.FlexibleSpace();
                     var c = new GUIContent(string.Format("{0} ({1})", AssetBundleModel.Model.DataSource.Name, AssetBundleModel.Model.DataSource.ProviderName), "Select Asset Bundle Set");
-                    if (m_DataSourceList.Count == 0) c = new GUIContent($"None", "Browse to Load");
+                    if (m_DataSourceList.Count == 0) c = new GUIContent($"None", "Browse to Load BuildMaps");
                     if (GUILayout.Button(c, EditorStyles.toolbarPopup))
                     {
                         GenericMenu menu = new GenericMenu();

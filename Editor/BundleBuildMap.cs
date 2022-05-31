@@ -126,6 +126,7 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
                 }
                 catch
                 {
+                    return retList;
                 }
             }
         }

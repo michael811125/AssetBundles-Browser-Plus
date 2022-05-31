@@ -8,8 +8,10 @@ This tool is intended to replace the current workflow of selecting assets and se
 Added BuildMap to group different version assets (click right to Create/Asset Bundles Broswer Plus/BundleBuildMap).
 
 # Installation
-- You can add https://github.com/michael811125/AssetBundles-Browser-Plus.git to Package Manager (But read only will lead to default BuildMap data source cannot save).
-- Suggest to download unitypackage from [Releases](https://github.com/michael811125/AssetBundles-Browser-Plus/releases).
+### Install via git URL
+Add https://github.com/michael811125/AssetBundles-Browser-Plus.git to Package Manager.
+### Import unitypackage
+Download unitypackage from [Releases](https://github.com/michael811125/AssetBundles-Browser-Plus/releases).
 
 ## Full Documentation
 #### Official Released Features
