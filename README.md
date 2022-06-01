@@ -5,7 +5,7 @@ This tool enables the user to view and edit the configuration of asset bundles f
 This tool is intended to replace the current workflow of selecting assets and setting their asset bundle manually in the inspector.  It can be dropped into any Unity project with a version of 5.6 or greater.  It will create a new menu item in *Window->AssetBundle Browser*.  
 
 # Unofficial Extension
-Added BuildMap to group different version assets (click right to Create/Asset Bundles Broswer Plus/BundleBuildMap).
+Added BuildMap to group different version assets (right-click to Create/Asset Bundles Broswer Plus/BundleBuildMap).
 
 ![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/img_01.png)
 
