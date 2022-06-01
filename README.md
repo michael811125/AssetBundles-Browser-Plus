@@ -7,6 +7,10 @@ This tool is intended to replace the current workflow of selecting assets and se
 # Unofficial Extension
 Added BuildMap to group different version assets (click right to Create/Asset Bundles Broswer Plus/BundleBuildMap).
 
+![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/img_01.png)
+
+![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/img_02.png)
+
 # Installation
 ### Install via git URL
 Add https://github.com/michael811125/AssetBundles-Browser-Plus.git to Package Manager.
