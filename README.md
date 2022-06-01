@@ -10,8 +10,6 @@ Added BuildMap to group different version assets (click right to Create/Asset Bu
 # Installation
 ### Install via git URL
 Add https://github.com/michael811125/AssetBundles-Browser-Plus.git to Package Manager.
-### Import unitypackage
-Download unitypackage from [Releases](https://github.com/michael811125/AssetBundles-Browser-Plus/releases).
 
 ## Full Documentation
 #### Official Released Features

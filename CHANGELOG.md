@@ -1,8 +1,10 @@
 # Changelog (unofficial)
 
+## [1.0.1] - 2022-06-01
+- Optimized comment out when open editor to CreateDefaultDataSources().
+
 ## [1.0.0] - 2022-06-01
 - Added BuildMap to group different version assets (click right to Create/Asset Bundles Broswer Plus/BundleBuildMap).
-- Added default BuildMap replace AssetDatabaseABDataSource => Default (Built-in).
 - Modified AssetDatabaseABDataSource to hide ABDataSource.
 - Removed Tests editor.
 

@@ -46,11 +46,11 @@ namespace AssetBundleBrowser
         const float k_ToolbarPadding = 15;
         const float k_MenubarPadding = 32;
 
-        [MenuItem("Window/AssetBundle Browser", priority = 2050)]
+        [MenuItem("Window/AssetBundle Browser Plus", priority = 2050)]
         static void ShowWindow()
         {
             s_instance = null;
-            instance.titleContent = new GUIContent("AssetBundles");
+            instance.titleContent = new GUIContent("AssetBundlesPlus");
             instance.Show();
         }
 

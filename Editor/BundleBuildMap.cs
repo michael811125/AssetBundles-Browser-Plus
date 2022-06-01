@@ -75,7 +75,7 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
     {
         var retList = new List<ABDataSource>();
 
-        retList.AddRange(CreateDefaultDataSources());
+        //retList.AddRange(CreateDefaultDataSources());
 
         string folderPath = EditorPrefs.GetString(KEY_DATASOURCES_FOLDER_PATH, string.Empty);
         if (string.IsNullOrEmpty(folderPath)) return retList;
