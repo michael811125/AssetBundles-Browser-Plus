@@ -283,7 +283,7 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
     private string[] _GetAllAssetBundleNames()
     {
         // refresh all bundle by buildMap
-        this._RefreshAllAssetBundle();
+        //this.RefreshAllAssetBundle();
 
         List<string> bundleNames = new List<string>();
         AssetBundleBuild[] abBuilds = this._GetBuildMap();
@@ -297,7 +297,7 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
         return bundleNames.ToArray();
     }
 
-    private void _RefreshAllAssetBundle()
+    public void RefreshAllAssetBundle()
     {
         // clear all asset bundle and compare with buildMap
         foreach (var bundleName in AssetDatabase.GetAllAssetBundleNames())

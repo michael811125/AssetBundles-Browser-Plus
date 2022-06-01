@@ -31,6 +31,7 @@ namespace AssetBundleBrowser
 
         [SerializeField]
         int m_DataSourceIndex;
+        public const string KEY_DATASOURCE_INDEX = "KEY_DATASOURCE_INDEX";
 
         [SerializeField]
         internal AssetBundleManageTab m_ManageTab;
@@ -99,8 +100,13 @@ namespace AssetBundleBrowser
             multiDataSource = true;
             if (m_DataSourceList.Count > 0)
             {
+                m_DataSourceIndex = EditorPrefs.GetInt(KEY_DATASOURCE_INDEX, 0);
                 if (m_DataSourceIndex >= m_DataSourceList.Count) m_DataSourceIndex = 0;
                 AssetBundleModel.Model.DataSource = m_DataSourceList[m_DataSourceIndex];
+                if (typeof(BundleBuildMap).IsInstanceOfType(AssetBundleModel.Model.DataSource))
+                {
+                    (AssetBundleModel.Model.DataSource as BundleBuildMap).RefreshAllAssetBundle();
+                }
             }
         }
         private void OnDisable()
@@ -171,7 +177,13 @@ namespace AssetBundleBrowser
                 case Mode.Browser:
                     clicked = GUILayout.Button(m_RefreshTexture);
                     if (clicked)
+                    {
+                        if (typeof(BundleBuildMap).IsInstanceOfType(AssetBundleModel.Model.DataSource))
+                        {
+                            (AssetBundleModel.Model.DataSource as BundleBuildMap).RefreshAllAssetBundle();
+                        }
                         m_ManageTab.ForceReloadData();
+                    }
                     break;
                 case Mode.Builder:
                     GUILayout.Space(m_RefreshTexture.width + k_ToolbarPadding);
@@ -220,8 +232,13 @@ namespace AssetBundleBrowser
                                 () =>
                                 {
                                     m_DataSourceIndex = counter;
+                                    EditorPrefs.SetInt(KEY_DATASOURCE_INDEX, m_DataSourceIndex);
                                     var thisDataSource = ds;
                                     AssetBundleModel.Model.DataSource = thisDataSource;
+                                    if (typeof(BundleBuildMap).IsInstanceOfType(AssetBundleModel.Model.DataSource))
+                                    {
+                                        (AssetBundleModel.Model.DataSource as BundleBuildMap).RefreshAllAssetBundle();
+                                    }
                                     m_ManageTab.ForceReloadData();
                                 }
                             );

@@ -1,5 +1,10 @@
 # Changelog (unofficial)
 
+## [1.1.0] - 2022-06-01
+- Optimized processing efficiency (does not refresh with every change). When open editor or manual press refresh button will refresh build map to reload data (only typeof => BundleBuildMap).
+- Added save for data source index to make sure next open can get correct index to deploy bundles.
+#### 【Remark】When editor window is opening but you have any asset name or asset path changed at this time, You have to manual press refresh button to reload build map data.
+
 ## [1.0.1] - 2022-06-01
 - Optimized comment out when open editor to CreateDefaultDataSources().
 
