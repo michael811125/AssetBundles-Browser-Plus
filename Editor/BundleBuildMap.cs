@@ -470,7 +470,7 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
                 {
                     string outputDirectory = $"{info.outputDirectory}/{this.customBuildMaps[i].sourceName}";
 
-                    if (this.BuildAssetBundles(outputDirectory, this.customBuildMaps[i].GetBuildMap(), info.options, info.buildTarget, null))
+                    if (BuildAssetBundles(outputDirectory, this.customBuildMaps[i].GetBuildMap(), info.options, info.buildTarget, null))
                     {
                         stringBuilder.Append($"<color=#9DFF42>[{this.customBuildMaps[i].sourceName}] Build Result => Success</color>\n");
                     }
@@ -485,13 +485,13 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
         }
         else
         {
-            return this.BuildAssetBundles(info.outputDirectory, this.GetBuildMap(), info.options, info.buildTarget, info.onBuild);
+            return BuildAssetBundles(info.outputDirectory, this.GetBuildMap(), info.options, info.buildTarget, info.onBuild);
         }
 
         return false;
     }
 
-    public bool BuildAssetBundles(string outputDirectory, AssetBundleBuild[] buidMap, BuildAssetBundleOptions options, BuildTarget buildTarget, Action<string> onBuild)
+    public static bool BuildAssetBundles(string outputDirectory, AssetBundleBuild[] buidMap, BuildAssetBundleOptions options, BuildTarget buildTarget, Action<string> onBuild)
     {
         if (!Directory.Exists(outputDirectory)) Directory.CreateDirectory(outputDirectory);
 
