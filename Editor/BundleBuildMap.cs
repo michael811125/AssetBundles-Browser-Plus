@@ -341,6 +341,12 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
         }
     }
 
+    public BundleBuildMap[] GetCustomBuildMaps()
+    {
+        if (this.customBuildMaps == null) return new BundleBuildMap[] { };
+        return this.customBuildMaps.ToArray();
+    }
+
     /// <summary>
     /// String similarity (levenshtein distance algorithm)
     /// </summary>
