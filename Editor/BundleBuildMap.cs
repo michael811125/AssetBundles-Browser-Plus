@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using UnityEditor;
 using UnityEngine;
 
@@ -18,21 +19,22 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
         public string assetPath;          // assetName
         public string assetBundleName;    // bundleName
         public string assetBundleVariant; // variantName
-        private string _fullBundleName;   // fullBundelName = {bundleName}.{bariantName} => split by . [extension]
-        public string fullBundleName { get { return _fullBundleName; } }
-
-        /// <summary>
-        /// Auto check to set bundleName and variantName
-        /// </summary>
-        public void AutoSetFullBundleName()
+        public string fullBundleName      // fullBundelName = {bundleName}.{bariantName} => split by . [extension]
         {
-            if (!string.IsNullOrEmpty(this.assetBundleVariant)) this._fullBundleName = $"{this.assetBundleName}.{this.assetBundleVariant}";
-            else this._fullBundleName = this.assetBundleName;
+            get
+            {
+                if (!string.IsNullOrEmpty(this.assetBundleVariant)) return $"{this.assetBundleName}.{this.assetBundleVariant}";
+                else return this.assetBundleName;
+            }
         }
     }
 
+    public bool allowCustomBuild = false;
     public string sourceName = string.Empty;
     public string providerName = string.Empty;
+
+    [SerializeField]
+    internal List<BundleBuildMap> customBuildMaps;
 
     /// <summary>
     /// (Implement ABDataSource interface) Name
@@ -137,7 +139,7 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
     /// <summary>
     /// Save data
     /// </summary>
-    private void _Save()
+    public void Save()
     {
         EditorUtility.SetDirty(this);
         AssetDatabase.SaveAssetIfDirty(this);
@@ -209,13 +211,13 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
     private void _Add(string assetPath, BuildBundleInfo buildBundleInfo)
     {
         this._dictBuildBundleInfo.Add(assetPath, buildBundleInfo);
-        this._Save();
+        this.Save();
     }
 
     private void _Remove(string assetPath)
     {
         this._dictBuildBundleInfo.Remove(assetPath);
-        this._Save();
+        this.Save();
     }
 
     private void _AddBundle(string assetPath, string bundleName, string variantName)
@@ -231,7 +233,6 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
                 buildBundleInfo.assetPath = assetPath;
                 buildBundleInfo.assetBundleName = bundleName;
                 buildBundleInfo.assetBundleVariant = variantName;
-                buildBundleInfo.AutoSetFullBundleName();
                 this._Add(assetPath, buildBundleInfo);
             }
             else
@@ -245,14 +246,13 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
                     buildBundleInfo.assetPath = assetPath;
                     buildBundleInfo.assetBundleName = bundleName;
                     buildBundleInfo.assetBundleVariant = variantName;
-                    buildBundleInfo.AutoSetFullBundleName();
-                    this._Save();
+                    this.Save();
                 }
             }
         }
     }
 
-    private AssetBundleBuild[] _GetBuildMap()
+    public AssetBundleBuild[] GetBuildMap()
     {
         // group by assetBundleName
         var groups = this._dictBuildBundleInfo.Values.GroupBy(x => x.assetBundleName);
@@ -286,7 +286,7 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
         //this.RefreshAllAssetBundle();
 
         List<string> bundleNames = new List<string>();
-        AssetBundleBuild[] abBuilds = this._GetBuildMap();
+        AssetBundleBuild[] abBuilds = this.GetBuildMap();
         for (int i = 0; i < abBuilds.Length; i++)
         {
             // to chect combine bundleName and variantName for fullBundleName
@@ -330,7 +330,7 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
             }
         }
 
-        foreach (var abBuild in this._GetBuildMap())
+        foreach (var abBuild in this.GetBuildMap())
         {
             foreach (string assetName in abBuild.assetNames)
             {
@@ -395,6 +395,7 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
         var bundleName = importer.assetBundleName;
         if (importer.assetBundleVariant.Length > 0)
         {
+            // combine bundle name with variant name (full bundle name)
             bundleName = bundleName + "." + importer.assetBundleVariant;
         }
         return bundleName;
@@ -452,7 +453,43 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
         }
 
         // BuildAssetBundles with buildMap
-        var buildManifest = BuildPipeline.BuildAssetBundles(info.outputDirectory, this._GetBuildMap(), info.options, info.buildTarget);
+        if (this.allowCustomBuild)
+        {
+            if (this.customBuildMaps != null && this.customBuildMaps.Count > 0)
+            {
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.Append("Custom Build Maps Progress Notification:\n");
+
+                for (int i = 0; i < this.customBuildMaps.Count; i++)
+                {
+                    string outputDirectory = $"{info.outputDirectory}/{this.customBuildMaps[i].sourceName}";
+
+                    if (this.BuildAssetBundles(outputDirectory, this.customBuildMaps[i].GetBuildMap(), info.options, info.buildTarget, null))
+                    {
+                        stringBuilder.Append($"<color=#9DFF42>[{this.customBuildMaps[i].sourceName}] Build Result => Success</color>\n");
+                    }
+                    else
+                    {
+                        stringBuilder.Append($"<color=#FF4243>[{this.customBuildMaps[i].sourceName}] Build Result => Failure</color>\n");
+                    }
+                }
+
+                Debug.Log(stringBuilder.ToString());
+            }
+        }
+        else
+        {
+            return this.BuildAssetBundles(info.outputDirectory, this.GetBuildMap(), info.options, info.buildTarget, info.onBuild);
+        }
+
+        return false;
+    }
+
+    public bool BuildAssetBundles(string outputDirectory, AssetBundleBuild[] buidMap, BuildAssetBundleOptions options, BuildTarget buildTarget, Action<string> onBuild)
+    {
+        if (!Directory.Exists(outputDirectory)) Directory.CreateDirectory(outputDirectory);
+
+        var buildManifest = BuildPipeline.BuildAssetBundles(outputDirectory, buidMap, options, buildTarget);
         if (buildManifest == null)
         {
             Debug.Log("Error in build");
@@ -461,10 +498,7 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
 
         foreach (var assetBundleName in buildManifest.GetAllAssetBundles())
         {
-            if (info.onBuild != null)
-            {
-                info.onBuild(assetBundleName);
-            }
+            onBuild?.Invoke(assetBundleName);
         }
 
         return true;

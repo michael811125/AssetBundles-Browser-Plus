@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -72,6 +73,8 @@ namespace AssetBundleBrowser
 
         private void OnEnable()
         {
+            this._InitSerializedProperties();
+
             Rect subPos = GetSubWindowArea();
             if (m_ManageTab == null)
                 m_ManageTab = new AssetBundleManageTab();
@@ -103,10 +106,8 @@ namespace AssetBundleBrowser
                 m_DataSourceIndex = EditorPrefs.GetInt(KEY_DATASOURCE_INDEX, 0);
                 if (m_DataSourceIndex >= m_DataSourceList.Count) m_DataSourceIndex = 0;
                 AssetBundleModel.Model.DataSource = m_DataSourceList[m_DataSourceIndex];
-                if (typeof(BundleBuildMap).IsInstanceOfType(AssetBundleModel.Model.DataSource))
-                {
-                    (AssetBundleModel.Model.DataSource as BundleBuildMap).RefreshAllAssetBundle();
-                }
+                //ReloadBuildMapDataSource();
+                this._LoadBuildMaps();
             }
         }
         private void OnDisable()
@@ -155,7 +156,13 @@ namespace AssetBundleBrowser
             switch (m_Mode)
             {
                 case Mode.Builder:
+                    // build tab
                     m_BuildTab.OnGUI();
+                    // build maps section (Extension)
+                    if (typeof(BundleBuildMap).IsInstanceOfType(AssetBundleModel.Model.DataSource))
+                    {
+                        if ((AssetBundleModel.Model.DataSource as BundleBuildMap).allowCustomBuild) this._DrawBuildMaps();
+                    }
                     break;
                 case Mode.Inspect:
                     m_InspectTab.OnGUI(GetSubWindowArea());
@@ -178,10 +185,7 @@ namespace AssetBundleBrowser
                     clicked = GUILayout.Button(m_RefreshTexture);
                     if (clicked)
                     {
-                        if (typeof(BundleBuildMap).IsInstanceOfType(AssetBundleModel.Model.DataSource))
-                        {
-                            (AssetBundleModel.Model.DataSource as BundleBuildMap).RefreshAllAssetBundle();
-                        }
+                        ReloadBuildMapDataSource();
                         m_ManageTab.ForceReloadData();
                     }
                     break;
@@ -212,7 +216,7 @@ namespace AssetBundleBrowser
                     GUILayout.Label("Bundle Data Source:");
                     GUILayout.FlexibleSpace();
                     var c = new GUIContent(string.Format("{0} ({1})", AssetBundleModel.Model.DataSource.Name, AssetBundleModel.Model.DataSource.ProviderName), "Select Asset Bundle Set");
-                    if (m_DataSourceList.Count == 0) c = new GUIContent($"None", "Browse to Load BuildMaps");
+                    if (m_DataSourceList.Count == 0) c = new GUIContent("None", "Browse to Load BuildMaps");
                     if (GUILayout.Button(c, EditorStyles.toolbarPopup))
                     {
                         GenericMenu menu = new GenericMenu();
@@ -227,7 +231,6 @@ namespace AssetBundleBrowser
                                 menu.AddSeparator("");
 
                             var counter = index;
-                            //(ds as AssetBundleDataSource.AssetDatabaseABDataSourceFirst)
                             menu.AddItem(new GUIContent(@$"{ds.Name} ({ds.ProviderName})"), false,
                                 () =>
                                 {
@@ -235,14 +238,10 @@ namespace AssetBundleBrowser
                                     EditorPrefs.SetInt(KEY_DATASOURCE_INDEX, m_DataSourceIndex);
                                     var thisDataSource = ds;
                                     AssetBundleModel.Model.DataSource = thisDataSource;
-                                    if (typeof(BundleBuildMap).IsInstanceOfType(AssetBundleModel.Model.DataSource))
-                                    {
-                                        (AssetBundleModel.Model.DataSource as BundleBuildMap).RefreshAllAssetBundle();
-                                    }
+                                    //ReloadBuildMapDataSource();
                                     m_ManageTab.ForceReloadData();
                                 }
                             );
-
                         }
 
                         menu.ShowAsContext();
@@ -260,7 +259,7 @@ namespace AssetBundleBrowser
                     /* Open folder to load DataSources for BundleBuildMap */
                     Color bc = GUI.backgroundColor;
                     GUI.backgroundColor = new Color32(0, 255, 235, 255);
-                    if (GUILayout.Button("Browse Folder to Load BuildMaps"))
+                    if (GUILayout.Button("Browse Folder to Load BuildMaps", GUILayout.MaxWidth(225f)))
                     {
                         BundleBuildMap.OpenDataSources();
                         InitDataSources();
@@ -273,12 +272,93 @@ namespace AssetBundleBrowser
             }
         }
 
+        #region Extension paramters
+        [SerializeField]
+        protected List<BundleBuildMap> _buildMaps = new List<BundleBuildMap>();
+        [SerializeField]
+        private Vector2 m_buildMapSectionScrollPosition;
+        protected SerializedObject _soThis;
+        protected SerializedProperty _spBuildMaps;
+        #endregion
 
-        //string path = EditorUtility.OpenFilePanel("Load From Json", EditorPrefs.GetString(keyLoadFromJsonPath, Application.dataPath), "json");
+        /// <summary>
+        /// Extension method for init serialized properties
+        /// </summary>
+        private void _InitSerializedProperties()
+        {
+            _soThis = new SerializedObject(this);
+            _spBuildMaps = _soThis.FindProperty("_buildMaps");
+        }
 
-        //    if (path.IsNullOrZeroEmpty()) return;
+        /// <summary>
+        /// Extension method for custom build maps
+        /// </summary>
+        private void _DrawBuildMaps()
+        {
+            GUILayout.FlexibleSpace();
 
-        //    EditorPrefs.SetString(keyLoadFromJsonPath, this._GetCorrectedPathWithoutFileName(path));
+            // desc label
+            var centeredStyle = new GUIStyle(GUI.skin.GetStyle("Label"));
+            centeredStyle.alignment = TextAnchor.UpperCenter;
+            GUILayout.Label(new GUIContent("Custom build maps\n(Please check to make sure <AssetNames = AssetPaths> are correct for following build maps)"), centeredStyle);
+            EditorGUILayout.Space();
+
+            // list build mpas
+            m_buildMapSectionScrollPosition = EditorGUILayout.BeginScrollView(m_buildMapSectionScrollPosition);
+            GUIStyle style = new GUIStyle();
+            var bg = new Texture2D(1, 1);
+            Color[] pixels = Enumerable.Repeat(new Color(0f, 0.35f, 0.32f, 0.5f), Screen.width * Screen.height).ToArray();
+            bg.SetPixels(pixels);
+            bg.Apply();
+            style.normal.background = bg;
+            GUILayout.BeginVertical(style);
+            Color bc = GUI.backgroundColor;
+            GUI.backgroundColor = new Color32(0, 255, 235, 255);
+            _soThis.Update();
+            EditorGUI.BeginChangeCheck();
+            EditorGUILayout.PropertyField(_spBuildMaps, true);
+            _soThis.ApplyModifiedProperties();
+            if (EditorGUI.EndChangeCheck()) this._SaveBuildMaps();
+            GUI.backgroundColor = bc;
+
+            // reload button
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            bc = GUI.backgroundColor;
+            GUI.backgroundColor = new Color32(229, 149, 255, 255);
+            if (GUILayout.Button("Reload from current data source", GUILayout.MaxWidth(220f))) this._LoadBuildMaps();
+            GUI.backgroundColor = bc;
+            GUILayout.EndHorizontal();
+
+            GUILayout.EndVertical();
+            EditorGUILayout.EndScrollView();
+        }
+
+        private void _LoadBuildMaps()
+        {
+            if (typeof(BundleBuildMap).IsInstanceOfType(AssetBundleModel.Model.DataSource))
+            {
+                this._buildMaps = (AssetBundleModel.Model.DataSource as BundleBuildMap).customBuildMaps;
+            }
+        }
+
+        private void _SaveBuildMaps()
+        {
+            if (typeof(BundleBuildMap).IsInstanceOfType(AssetBundleModel.Model.DataSource))
+            {
+                (AssetBundleModel.Model.DataSource as BundleBuildMap).customBuildMaps = this._buildMaps;
+                (AssetBundleModel.Model.DataSource as BundleBuildMap).Save();
+            }
+        }
+
+        public static void ReloadBuildMapDataSource()
+        {
+            if (typeof(BundleBuildMap).IsInstanceOfType(AssetBundleModel.Model.DataSource))
+            {
+                (AssetBundleModel.Model.DataSource as BundleBuildMap).RefreshAllAssetBundle();
+            }
+        }
+
 
     }
 }

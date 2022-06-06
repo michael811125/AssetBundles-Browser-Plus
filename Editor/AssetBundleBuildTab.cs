@@ -211,10 +211,19 @@ namespace AssetBundleBrowser
                 GUILayout.EndHorizontal();
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
+                Color bc = GUI.backgroundColor;
+                GUI.backgroundColor = new Color32(66, 231, 255, 255);
+                if (GUILayout.Button("Open", GUILayout.MaxWidth(75f)))
+                    this._OpenFolder();
+                GUI.backgroundColor = bc;
+                GUI.backgroundColor = new Color32(255, 242, 0, 255);
                 if (GUILayout.Button("Browse", GUILayout.MaxWidth(75f)))
                     BrowseForFolder();
+                GUI.backgroundColor = bc;
+                GUI.backgroundColor = new Color32(255, 66, 116, 255);
                 if (GUILayout.Button("Reset", GUILayout.MaxWidth(75f)))
                     ResetPathToDefault();
+                GUI.backgroundColor = bc;
                 //if (string.IsNullOrEmpty(m_OutputPath))
                 //    m_OutputPath = EditorUserBuildSettings.GetPlatformSettings(EditorUserBuildSettings.activeBuildTarget.ToString(), "AssetBundleOutputPath");
                 GUILayout.EndHorizontal();
@@ -355,7 +364,6 @@ namespace AssetBundleBrowser
             buildInfo.buildTarget = (BuildTarget)m_UserData.m_BuildTarget;
             buildInfo.onBuild = (assetBundleName) =>
             {
-                Debug.Log(assetBundleName);
                 if (m_InspectTab == null)
                     return;
                 m_InspectTab.AddBundleFolder(buildInfo.outputDirectory);
@@ -392,6 +400,19 @@ namespace AssetBundleBrowser
 
                 File.Copy(filePath, newFilePath, true);
             }
+        }
+
+        /// <summary>
+        /// Extension method for open folder
+        /// </summary>
+        private void _OpenFolder()
+        {
+            string dir = $"{Application.dataPath}/../{m_UserData.m_OutputPath}";
+            if (!Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+            System.Diagnostics.Process.Start(dir);
         }
 
         private void BrowseForFolder()

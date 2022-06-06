@@ -1,5 +1,12 @@
 # Changelog (unofficial)
 
+## [1.2.0] - 2022-06-06
+- Optimized processing efficiency (only manual press refresh button will reload AssetDatabase by build map data source).
+- Added custom build maps option for build.
+- Added Open button in Build tab.
+- Modified GetBuildMap method change private to public. You can cutom your BuildTool to gets AssetBundleBuild[] via BundleBuildMap(ScriptableObject).
+#### 【Remark】When switch data source will not auto reload AssetDatabase, you will see Configure tab will appear exclamation mark messages but doesn't matter. If you want reload AssetDatabase by build map, you just manual press refresh button in left-top (If you have many assets will take a long time for reloading).
+
 ## [1.1.0] - 2022-06-01
 - Optimized processing efficiency (does not refresh with every change). When open editor or manual press refresh button will refresh build map to reload data (only typeof => BundleBuildMap).
 - Added save for data source index to make sure next open can get correct index to deploy bundles.
