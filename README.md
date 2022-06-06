@@ -13,7 +13,7 @@ Added BuildMap to group different version assets (right-click to Create/Asset Bu
 
 When switch data source will not auto reload AssetDatabase, you will see Configure tab will appear exclamation mark messages but doesn't matter. If you want reload AssetDatabase by build map, you just manual press refresh button in left-top (If you have many assets will take a long time for reloading).
 
-![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/img_03.png)
+![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/img_03.PNG)
 
 # Installation
 ### Install via git URL
