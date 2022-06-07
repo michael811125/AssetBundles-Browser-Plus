@@ -88,7 +88,8 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
             foreach (var file in files)
             {
                 var stripPath = file.Replace(Application.dataPath, "Assets");
-                retList.Add(AssetDatabase.LoadAssetAtPath<BundleBuildMap>(stripPath));
+                var data = AssetDatabase.LoadAssetAtPath<BundleBuildMap>(stripPath);
+                if (AssetDatabase.IsNativeAsset(data)) retList.Add(data);
             }
         }
         catch
@@ -491,20 +492,23 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
         return false;
     }
 
-    public static bool BuildAssetBundles(string outputDirectory, AssetBundleBuild[] buidMap, BuildAssetBundleOptions options, BuildTarget buildTarget, Action<string> onBuild)
+    public static bool BuildAssetBundles(string outputDirectory, AssetBundleBuild[] buildMap, BuildAssetBundleOptions options, BuildTarget buildTarget, Action<string> onBuild)
     {
         if (!Directory.Exists(outputDirectory)) Directory.CreateDirectory(outputDirectory);
 
-        var buildManifest = BuildPipeline.BuildAssetBundles(outputDirectory, buidMap, options, buildTarget);
+        var buildManifest = BuildPipeline.BuildAssetBundles(outputDirectory, buildMap, options, buildTarget);
         if (buildManifest == null)
         {
             Debug.Log("Error in build");
             return false;
         }
 
-        foreach (var assetBundleName in buildManifest.GetAllAssetBundles())
+        if (onBuild != null)
         {
-            onBuild?.Invoke(assetBundleName);
+            foreach (var assetBundleName in buildManifest.GetAllAssetBundles())
+            {
+                onBuild(assetBundleName);
+            }
         }
 
         return true;

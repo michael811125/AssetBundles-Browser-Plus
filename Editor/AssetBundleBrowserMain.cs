@@ -32,7 +32,7 @@ namespace AssetBundleBrowser
 
         [SerializeField]
         int m_DataSourceIndex;
-        public const string KEY_DATASOURCE_INDEX = "KEY_DATASOURCE_INDEX";
+        internal const string KEY_DATASOURCE_INDEX = "KEY_DATASOURCE_INDEX";
 
         [SerializeField]
         internal AssetBundleManageTab m_ManageTab;
@@ -95,6 +95,7 @@ namespace AssetBundleBrowser
             //determine if we are "multi source" or not...
             //multiDataSource = false;
             m_DataSourceList = new List<AssetBundleDataSource.ABDataSource>();
+
             foreach (var info in AssetBundleDataSource.ABDataSourceProviderUtility.CustomABDataSourceTypes)
             {
                 m_DataSourceList.AddRange(info.GetMethod("CreateDataSources").Invoke(null, null) as List<AssetBundleDataSource.ABDataSource>);
@@ -106,7 +107,7 @@ namespace AssetBundleBrowser
                 m_DataSourceIndex = EditorPrefs.GetInt(KEY_DATASOURCE_INDEX, 0);
                 if (m_DataSourceIndex >= m_DataSourceList.Count) m_DataSourceIndex = 0;
                 AssetBundleModel.Model.DataSource = m_DataSourceList[m_DataSourceIndex];
-                //ReloadBuildMapDataSource();
+                if (_autoRefresh) ReloadBuildMapDataSource();
                 this._LoadBuildMaps();
             }
         }
@@ -238,7 +239,7 @@ namespace AssetBundleBrowser
                                     EditorPrefs.SetInt(KEY_DATASOURCE_INDEX, m_DataSourceIndex);
                                     var thisDataSource = ds;
                                     AssetBundleModel.Model.DataSource = thisDataSource;
-                                    //ReloadBuildMapDataSource();
+                                    if (_autoRefresh) ReloadBuildMapDataSource();
                                     m_ManageTab.ForceReloadData();
                                 }
                             );
@@ -255,6 +256,17 @@ namespace AssetBundleBrowser
 
                         GUILayout.Label("Read Only", tbLabel);
                     }
+
+                    /* Auto Reload Toggle */
+                    _autoRefresh = GUILayout.Toggle(
+                        _autoRefresh,
+                        new GUIContent
+                        (
+                            "Auto Refresh",
+                            "If checked will auto reload data source on open and switch other data source also will auto reload. (Not Recommend, when you have many assets will take a long time to load. *Recommend press refresh button manually.)"
+                        )
+                    );
+                    EditorPrefs.SetBool(KEY_AUTO_REFRESH, _autoRefresh);
 
                     /* Open folder to load DataSources for BundleBuildMap */
                     Color bc = GUI.backgroundColor;
@@ -274,11 +286,15 @@ namespace AssetBundleBrowser
 
         #region Extension paramters
         [SerializeField]
-        protected List<BundleBuildMap> _buildMaps = new List<BundleBuildMap>();
+        internal List<BundleBuildMap> _buildMaps = new List<BundleBuildMap>();
         [SerializeField]
-        private Vector2 m_buildMapSectionScrollPosition;
-        protected SerializedObject _soThis;
-        protected SerializedProperty _spBuildMaps;
+        internal Vector2 _buildMapSectionScrollPosition;
+        internal SerializedObject _soThis;
+        internal SerializedProperty _spBuildMaps;
+
+        [SerializeField]
+        internal bool _autoRefresh = false;
+        internal const string KEY_AUTO_REFRESH = "KEY_AUTO_REFRESH";
         #endregion
 
         /// <summary>
@@ -288,6 +304,7 @@ namespace AssetBundleBrowser
         {
             _soThis = new SerializedObject(this);
             _spBuildMaps = _soThis.FindProperty("_buildMaps");
+            _autoRefresh = EditorPrefs.GetBool(KEY_AUTO_REFRESH, false);
         }
 
         /// <summary>
@@ -304,7 +321,7 @@ namespace AssetBundleBrowser
             EditorGUILayout.Space();
 
             // list build mpas
-            m_buildMapSectionScrollPosition = EditorGUILayout.BeginScrollView(m_buildMapSectionScrollPosition);
+            _buildMapSectionScrollPosition = EditorGUILayout.BeginScrollView(_buildMapSectionScrollPosition);
             GUIStyle style = new GUIStyle();
             var bg = new Texture2D(1, 1);
             Color[] pixels = Enumerable.Repeat(new Color(0f, 0.35f, 0.32f, 0.5f), Screen.width * Screen.height).ToArray();
@@ -358,7 +375,5 @@ namespace AssetBundleBrowser
                 (AssetBundleModel.Model.DataSource as BundleBuildMap).RefreshAllAssetBundle();
             }
         }
-
-
     }
 }

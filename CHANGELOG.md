@@ -1,5 +1,9 @@
 # Changelog (unofficial)
 
+## [1.2.1] - 2022-06-07
+- Added AutoRefresh toggle, but not recommend to checked (unless you don't have many assets).
+- Modified methods and params access modifiers.
+
 ## [1.2.0] - 2022-06-06
 - Optimized processing efficiency (only manual press refresh button will reload AssetDatabase by build map data source).
 - Added custom build maps option for build.
