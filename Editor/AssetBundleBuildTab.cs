@@ -304,6 +304,12 @@ namespace AssetBundleBrowser
 
         private void ExecuteBuild()
         {
+            if (AssetBundleBrowserMain.instance.DataSourceCount == 0)
+            {
+                EditorUtility.DisplayDialog("Build Message", "You don't have any data source!!! Please create a data source first.", "OK");
+                return;
+            }
+
             if (AssetBundleModel.Model.DataSource.CanSpecifyBuildOutputDirectory)
             {
                 if (string.IsNullOrEmpty(m_UserData.m_OutputPath))

@@ -110,6 +110,7 @@ namespace AssetBundleBrowser
                 if (_autoRefresh) ReloadBuildMapDataSource();
                 this._LoadBuildMaps();
             }
+            else AssetBundleModel.Model.DataSource = null;
         }
         private void OnDisable()
         {

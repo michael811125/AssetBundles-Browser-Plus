@@ -1,5 +1,8 @@
 # Changelog (unofficial)
 
+## [1.2.2] - 2022-06-07
+- Fixed When press build button will detect have any data source exist, if not will return and alert.
+
 ## [1.2.1] - 2022-06-07
 - Added AutoRefresh toggle, but not recommend to checked (unless you don't have many assets).
 - Modified methods and params access modifiers.
