@@ -9,7 +9,7 @@ using System.Text;
 using UnityEditor;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "NewBundleBuildMap", menuName = "Asset Bundles Browser Plus/Bundle Build Map Asset", order = 1)]
+[CreateAssetMenu(fileName = "NewBundleBuildMap", menuName = "AssetBundle Browser Plus/Bundle Build Map Asset", order = 1)]
 public class BundleBuildMap : ScriptableObject, ABDataSource
 {
     [Serializable]
