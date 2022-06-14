@@ -512,9 +512,8 @@ namespace AssetBundleBrowser.AssetBundleModel
             }
         }
 
-        internal static BundleInfo HandleDedupeBundles(IEnumerable<BundleInfo> bundles, bool onlyOverlappedAssets)
+        internal static BundleInfo HandleDedupeBundles(IEnumerable<BundleInfo> bundles, bool onlyOverlappedAssets, bool separateByAssetName)
         {
-            var newBundle = CreateEmptyBundle();
             HashSet<string> dupeAssets = new HashSet<string>();
             HashSet<string> fullAssetList = new HashSet<string>();
 
@@ -543,9 +542,27 @@ namespace AssetBundleBrowser.AssetBundleModel
             if (dupeAssets.Count == 0)
                 return null;
 
-            MoveAssetToBundle(dupeAssets, newBundle.m_Name.bundleName, string.Empty);
-            ExecuteAssetMove();
-            return newBundle;
+            if (!separateByAssetName)
+            {
+                var newBundle = CreateEmptyBundle();
+                MoveAssetToBundle(dupeAssets, newBundle.m_Name.bundleName, string.Empty);
+                ExecuteAssetMove();
+                return newBundle;
+            }
+            else
+            {
+                foreach (var assetName in dupeAssets)
+                {
+                    string groupName = "dependencies";
+                    var pathIndex = (assetName.LastIndexOf("/") == -1 ? assetName.LastIndexOf("\\") : assetName.LastIndexOf("/")) + 1;
+                    var variantCount = assetName.Length - (assetName.LastIndexOf(".") == -1 ? 0 : assetName.LastIndexOf("."));
+                    string bundleName = assetName.Substring(pathIndex, assetName.Length - variantCount - pathIndex);
+                    MoveAssetToBundle(assetName, $"{groupName}/{bundleName}".ToLower(), string.Empty);
+                    ExecuteAssetMove();
+                }
+            }
+
+            return null;
         }
 
         internal static BundleInfo HandleConvertToVariant(BundleDataInfo bundle)

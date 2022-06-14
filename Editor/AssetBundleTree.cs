@@ -212,7 +212,10 @@ namespace AssetBundleBrowser
                     }
                 }
                 if (selectedNodes[0].bundle.IsMessageSet(MessageSystem.MessageFlag.AssetsDuplicatedInMultBundles))
+                {
                     menu.AddItem(new GUIContent("Move duplicates to new bundle"), false, DedupeAllBundles, selectedNodes);
+                    menu.AddItem(new GUIContent("Move duplicates separate by asset name into <dependencies> folder"), false, DedupeSepareteBundles, selectedNodes);
+                }
                 menu.AddItem(new GUIContent("Rename"), false, RenameBundle, selectedNodes);
                 menu.AddItem(new GUIContent("Delete " + selectedNodes[0].displayName), false, DeleteBundles, selectedNodes);
 
@@ -221,6 +224,7 @@ namespace AssetBundleBrowser
             {
                 menu.AddItem(new GUIContent("Move duplicates shared by selected"), false, DedupeOverlappedBundles, selectedNodes);
                 menu.AddItem(new GUIContent("Move duplicates existing in any selected"), false, DedupeAllBundles, selectedNodes);
+                menu.AddItem(new GUIContent("Move duplicates by selected and separate by asset name into <dependencies> folder"), false, DedupeSepareteBundles, selectedNodes);
                 menu.AddItem(new GUIContent("Delete " + selectedNodes.Count + " selected bundles"), false, DeleteBundles, selectedNodes);
             }
             menu.ShowAsContext();
@@ -341,24 +345,29 @@ namespace AssetBundleBrowser
             }
         }
 
+        void DedupeSepareteBundles(object context)
+        {
+            DedupeBundles(context, false, true);
+        }
         void DedupeOverlappedBundles(object context)
         {
-            DedupeBundles(context, true);
+            DedupeBundles(context, true, false);
         }
         void DedupeAllBundles(object context)
         {
-            DedupeBundles(context, false);
+            DedupeBundles(context, false, false);
         }
-        void DedupeBundles(object context, bool onlyOverlappedAssets)
+        void DedupeBundles(object context, bool onlyOverlappedAssets, bool separateByAssetName)
         {
             var selectedNodes = context as List<AssetBundleModel.BundleTreeItem>;
-            var newBundle = AssetBundleModel.Model.HandleDedupeBundles(selectedNodes.Select(item => item.bundle), onlyOverlappedAssets);
+            var newBundle = AssetBundleModel.Model.HandleDedupeBundles(selectedNodes.Select(item => item.bundle), onlyOverlappedAssets, separateByAssetName);
             if (newBundle != null)
             {
                 var selection = new List<int>();
                 selection.Add(newBundle.nameHashCode);
                 ReloadAndSelect(selection);
             }
+            else if (separateByAssetName) Refresh();
             else
             {
                 if (onlyOverlappedAssets)
