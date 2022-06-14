@@ -176,15 +176,17 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
     private BuildBundleInfo _GetBuildBundleInfoByBundleNameWithSimilarAssetPath(string bundleName, string tAssetPath)
     {
         var BuildBundleInfoArray = this._GetBuildBundleInfoArrayByBundleName(bundleName);
-        Dictionary<int, BuildBundleInfo> samples = new Dictionary<int, BuildBundleInfo>();
+        Dictionary<decimal, BuildBundleInfo> samples = new Dictionary<decimal, BuildBundleInfo>();
         foreach (var buildBundleInfo in BuildBundleInfoArray)
         {
-            samples.Add(LevenshteinDistance(buildBundleInfo.assetPath, tAssetPath), buildBundleInfo);
+            decimal pct = LevenshteinDistance.LevenshteinDistanceDecimal(buildBundleInfo.assetPath, tAssetPath);
+            if (!samples.ContainsKey(pct)) samples.Add(pct, buildBundleInfo);
         }
 
         if (samples.Count > 0)
         {
-            int max = samples.Keys.Max();
+            decimal max = samples.Keys.Max();
+            Debug.Log($"<color=#FFE733>BundleName: {bundleName},</color> <color=#FF9933>Most Similar ({(max * 100).ToString("f2")}%) => Replace</color> <color=#33D6FF>old AssetPath: {samples[max].assetPath}</color> <color=#FF9933>to</color> <color=#A4FF33>new AssetPath:{tAssetPath}</color>");
             return samples[max];
         }
 
@@ -346,42 +348,6 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
     {
         if (this.customBuildMaps == null) return new BundleBuildMap[] { };
         return this.customBuildMaps.ToArray();
-    }
-
-    /// <summary>
-    /// String similarity (levenshtein distance algorithm)
-    /// </summary>
-    /// <param name="s"></param>
-    /// <param name="t"></param>
-    /// <returns></returns>
-    internal static int LevenshteinDistance(string s, string t)
-    {
-        int n = s.Length;
-        int m = t.Length;
-        int[,] d = new int[n + 1, m + 1];
-        if (n == 0)
-        {
-            return m;
-        }
-        if (m == 0)
-        {
-            return n;
-        }
-        for (int i = 0; i <= n; d[i, 0] = i++)
-            ;
-        for (int j = 0; j <= m; d[0, j] = j++)
-            ;
-        for (int i = 1; i <= n; i++)
-        {
-            for (int j = 1; j <= m; j++)
-            {
-                int cost = (t[j - 1] == s[i - 1]) ? 0 : 1;
-                d[i, j] = Math.Min(
-                    Math.Min(d[i - 1, j] + 1, d[i, j - 1] + 1),
-                    d[i - 1, j - 1] + cost);
-            }
-        }
-        return d[n, m];
     }
 
     #region Implement ABDataSource interfaces

@@ -1,5 +1,8 @@
 # Changelog (unofficial)
 
+## [1.2.3] - 2022-06-14
+- Optimized LevenshteinDistance algorithm.
+
 ## [1.2.2] - 2022-06-07
 - Fixed When press build button will detect have any data source exist, if not will return and alert.
 
