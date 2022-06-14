@@ -554,9 +554,15 @@ namespace AssetBundleBrowser.AssetBundleModel
                 foreach (var assetName in dupeAssets)
                 {
                     string groupName = "dependencies";
-                    var pathIndex = (assetName.LastIndexOf("/") == -1 ? assetName.LastIndexOf("\\") : assetName.LastIndexOf("/")) + 1;
-                    var variantCount = assetName.Length - (assetName.LastIndexOf(".") == -1 ? 0 : assetName.LastIndexOf("."));
-                    string bundleName = assetName.Substring(pathIndex, assetName.Length - variantCount - pathIndex);
+                    var lastPathIndex = (assetName.LastIndexOf("/") == -1 ? assetName.LastIndexOf("\\") : assetName.LastIndexOf("/")) + 1;
+                    System.Text.StringBuilder stringBuilder = new System.Text.StringBuilder();
+                    // get bundle name from first '.'
+                    for (int i = lastPathIndex; i < assetName.Length; i++)
+                    {
+                        if (assetName[i] == '.') break;
+                        stringBuilder.Append(assetName[i]);
+                    }
+                    string bundleName = stringBuilder.ToString();
                     MoveAssetToBundle(assetName, $"{groupName}/{bundleName}".ToLower(), string.Empty);
                     ExecuteAssetMove();
                 }

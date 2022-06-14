@@ -1,8 +1,11 @@
 # Changelog (unofficial)
 
+## [1.3.1] - 2022-06-14
+- Fixed when move duplicates separate by asset name, but asset name has many extension name ex: myAsset.atlas.txt => will only get bundle name from first '.' = "myAsset".
+
 ## [1.3.0] - 2022-06-14
-- Added Move duplicates separate by asset name into <dependencies> folder (right-click on a bundle in AssetBundle Browser Plus)
-- Added Move duplicates by selected and separate by asset name into <dependencies> folder (right-click on multi-bundle in AssetBundle Browser Plus)
+- Added Move duplicates separate by asset name into <dependencies> folder (right-click on a bundle in AssetBundle Browser Plus).
+- Added Move duplicates by selected and separate by asset name into <dependencies> folder (right-click on multi-bundle in AssetBundle Browser Plus).
 
 ## [1.2.3] - 2022-06-14
 - Optimized LevenshteinDistance algorithm.
