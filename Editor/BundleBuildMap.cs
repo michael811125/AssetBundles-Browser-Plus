@@ -206,7 +206,6 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
         List<BuildBundleInfo> listBuildBundleInfo = new List<BuildBundleInfo>();
         foreach (var bundleInfo in this._dictBuildBundleInfo.Values.ToArray())
         {
-            Debug.Log($"current: {bundleInfo.fullBundleName}, database: {bundleName}");
             if (bundleInfo.fullBundleName == bundleName) listBuildBundleInfo.Add(bundleInfo); ;
         }
 
