@@ -1,4 +1,5 @@
 ﻿using AssetBundleBrowser.AssetBundleDataSource;
+using AssetBundleBrowser.AssetBundleModel;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -205,7 +206,8 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
         List<BuildBundleInfo> listBuildBundleInfo = new List<BuildBundleInfo>();
         foreach (var bundleInfo in this._dictBuildBundleInfo.Values.ToArray())
         {
-            if (bundleInfo.fullBundleName == bundleName) listBuildBundleInfo.Add(bundleInfo);
+            Debug.Log($"current: {bundleInfo.fullBundleName}, database: {bundleName}");
+            if (bundleInfo.fullBundleName == bundleName) listBuildBundleInfo.Add(bundleInfo); ;
         }
 
         return listBuildBundleInfo.ToArray();
@@ -255,13 +257,13 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
         }
     }
 
-    public AssetBundleBuild[] GetBuildMap()
+    public AssetBundleBuild[] GetBuildMap(string[] bundleNames = null)
     {
         // group by assetBundleName
         var groups = this._dictBuildBundleInfo.Values.GroupBy(x => x.assetBundleName);
 
-        // after filter start to collect assetNames to AssetBundleBuild list
-        List<AssetBundleBuild> abBuilds = new List<AssetBundleBuild>();
+        // after filter start to collect assetNames to AssetBundleBuild dict
+        Dictionary<string, AssetBundleBuild> dictAssetBundleBuild = new Dictionary<string, AssetBundleBuild>();
         foreach (var group in groups)
         {
             var abBuild = new AssetBundleBuild();
@@ -277,17 +279,25 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
             }
             abBuild.assetNames = collectAssetNames.ToArray();
             abBuild.assetBundleVariant = assetBundleVariantName;
-            abBuilds.Add(abBuild);
+            dictAssetBundleBuild.Add(assetBundleName, abBuild);
         }
 
-        return abBuilds.ToArray();
+        // only return AssetBundleBuild list by selected
+        if (bundleNames != null)
+        {
+            List<AssetBundleBuild> listAssetBundleBuild = new List<AssetBundleBuild>();
+            foreach (var bundleName in bundleNames)
+            {
+                if (dictAssetBundleBuild.ContainsKey(bundleName)) listAssetBundleBuild.Add(dictAssetBundleBuild[bundleName]);
+            }
+            return listAssetBundleBuild.ToArray();
+        }
+
+        return dictAssetBundleBuild.Values.ToArray();
     }
 
     private string[] _GetAllAssetBundleNames()
     {
-        // refresh all bundle by buildMap
-        //this.RefreshAllAssetBundle();
-
         List<string> bundleNames = new List<string>();
         AssetBundleBuild[] abBuilds = this.GetBuildMap();
         for (int i = 0; i < abBuilds.Length; i++)
@@ -300,16 +310,22 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
         return bundleNames.ToArray();
     }
 
-    public void RefreshAllAssetBundle()
+    internal void RefreshAllAssetBundle(string[] bundleNames = null)
     {
+        bool bySelected = false;
+        if (bundleNames != null) bySelected = true;
+        else bundleNames = AssetDatabase.GetAllAssetBundleNames();
+
         // clear all asset bundle and compare with buildMap
-        foreach (var bundleName in AssetDatabase.GetAllAssetBundleNames())
+        foreach (var bundleName in bundleNames)
         {
+            // search current AssetDatabase and compare with current BuildMap whether asset path is different or not
             foreach (var assetPath in AssetDatabase.GetAssetPathsFromAssetBundle(bundleName))
             {
                 // to check variant
                 string variant = (bundleName.Split('.').Length > 1) ? bundleName.Split('.')[1] : string.Empty;
 
+                // if it's same with current BuildMap asset path key, but asset path is different will set again correct asset path from AssetDatabase
                 var buildBundleInfo = this._GetBuildBundleInfoByAssetPath(assetPath);
                 if (buildBundleInfo != null)
                 {
@@ -333,7 +349,8 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
             }
         }
 
-        foreach (var abBuild in this.GetBuildMap())
+        AssetBundleBuild[] abBuilds = bySelected ? this.GetBuildMap(bundleNames) : this.GetBuildMap();
+        foreach (var abBuild in abBuilds)
         {
             foreach (string assetName in abBuild.assetNames)
             {
@@ -342,6 +359,31 @@ public class BundleBuildMap : ScriptableObject, ABDataSource
                 else this._Remove(assetName);
             }
         }
+    }
+
+    internal void RefreshAllAssetBundle(IEnumerable<BundleInfo> bundles)
+    {
+        HashSet<string> bundleNames = new HashSet<string>();
+
+        foreach (var bundle in bundles)
+        {
+            // folder
+            if (typeof(BundleFolderInfo).IsInstanceOfType(bundle))
+            {
+                foreach (var subBundle in (bundle as BundleFolderInfo).GetChildList())
+                {
+                    string bundleName = subBundle.m_Name.bundleName;
+                    if (!bundleNames.Contains(bundleName)) bundleNames.Add(bundleName);
+                }
+            }
+            else if (typeof(BundleInfo).IsInstanceOfType(bundle))
+            {
+                string bundleName = bundle.m_Name.bundleName;
+                if (!bundleNames.Contains(bundleName)) bundleNames.Add(bundleName);
+            }
+        }
+
+        if (bundleNames.Count > 0) this.RefreshAllAssetBundle(bundleNames.ToArray());
     }
 
     public BundleBuildMap[] GetCustomBuildMaps()

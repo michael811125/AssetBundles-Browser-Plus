@@ -1,5 +1,8 @@
 # Changelog (unofficial)
 
+## [1.4.0] - 2022-06-18
+- Added right-click to refresh a specific bundle. You can use right-click on bundle tree will show up refresh option can refresh a specific bundle or certain bundles (only typeof => BundleBuildMap will show up that option).
+
 ## [1.3.1] - 2022-06-14
 - Fixed when move duplicates separate by asset name, but asset name has many extension name ex: myAsset.atlas.txt => will only get bundle name from first '.' = "myAsset".
 

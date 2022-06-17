@@ -218,7 +218,10 @@ namespace AssetBundleBrowser
                 }
                 menu.AddItem(new GUIContent("Rename"), false, RenameBundle, selectedNodes);
                 menu.AddItem(new GUIContent("Delete " + selectedNodes[0].displayName), false, DeleteBundles, selectedNodes);
-
+                if (typeof(BundleBuildMap).IsInstanceOfType(AssetBundleModel.Model.DataSource))
+                {
+                    menu.AddItem(new GUIContent("Refresh " + selectedNodes[0].displayName), false, RefreshBundles, selectedNodes);
+                }
             }
             else if (selectedNodes.Count > 1)
             {
@@ -226,6 +229,10 @@ namespace AssetBundleBrowser
                 menu.AddItem(new GUIContent("Move duplicates existing in any selected"), false, DedupeAllBundles, selectedNodes);
                 menu.AddItem(new GUIContent("Move duplicates by selected and separate by asset name into <dependencies> folder"), false, DedupeSepareteBundles, selectedNodes);
                 menu.AddItem(new GUIContent("Delete " + selectedNodes.Count + " selected bundles"), false, DeleteBundles, selectedNodes);
+                if (typeof(BundleBuildMap).IsInstanceOfType(AssetBundleModel.Model.DataSource))
+                {
+                    menu.AddItem(new GUIContent("Refresh " + selectedNodes.Count + " selected bundles"), false, RefreshBundles, selectedNodes);
+                }
             }
             menu.ShowAsContext();
         }
@@ -382,9 +389,15 @@ namespace AssetBundleBrowser
             var selectedNodes = b as List<AssetBundleModel.BundleTreeItem>;
             AssetBundleModel.Model.HandleBundleDelete(selectedNodes.Select(item => item.bundle));
             ReloadAndSelect(new List<int>());
-
-
         }
+
+        void RefreshBundles(object context)
+        {
+            var selectedNodes = context as List<AssetBundleModel.BundleTreeItem>;
+            (AssetBundleModel.Model.DataSource as BundleBuildMap).RefreshAllAssetBundle(selectedNodes.Select(item => item.bundle));
+            AssetBundleBrowserMain.instance.m_ManageTab.ForceReloadData();
+        }
+
         protected override void KeyEvent()
         {
             if (Event.current.keyCode == KeyCode.Delete && GetSelection().Count > 0)
