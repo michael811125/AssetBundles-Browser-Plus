@@ -21,7 +21,7 @@ Auto Refresh <font color=#FF0000>(Not Recommend)</font>
 
 ![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/desc_img_5.png)
 
-When switch data source if has exclamation mark messages you can right-click on bundle tree to refresh a specific bundle more efficiency (don't need to refresh all)
+When switch data source if has exclamation mark messages you can right-click on bundle tree to refresh a specific bundle more efficiency (don't need to refresh all), and you have changed asset path, rename asset name, delete asset from project you can also right-click to refresh.
 
 ![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/desc_img_6.png)
 
