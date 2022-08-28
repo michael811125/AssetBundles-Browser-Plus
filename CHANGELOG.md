@@ -1,5 +1,11 @@
 # Changelog (unofficial)
 
+## [1.5.0] - 2022-08-29
+- Added Sync feature for BuildMap. When drag a bundle to BuildMap can sync to specified BuildMap.
+- Added namespace AssetBundleBrowser.AssetBundleDataSource for BundleBuildMap class.
+- Added CustomBuildMap class for custom build.
+- Modified custom build feature. You can set build name by yourself, also can decide build or not.
+
 ## [1.4.0] - 2022-06-18
 - Added right-click to refresh a specific bundle. You can use right-click on bundle tree will show up refresh option can refresh a specific bundle or certain bundles (only typeof => BundleBuildMap will show up that option).
 

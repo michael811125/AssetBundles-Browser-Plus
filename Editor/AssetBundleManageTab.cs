@@ -140,7 +140,6 @@ namespace AssetBundleBrowser
             HandleHorizontalResize();
             HandleVerticalResize();
 
-
             if (AssetBundleModel.Model.BundleListIsEmpty())
             {
                 m_BundleTree.OnGUI(m_Position);

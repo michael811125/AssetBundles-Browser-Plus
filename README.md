@@ -7,25 +7,37 @@ This tool is intended to replace the current workflow of selecting assets and se
 # Unofficial Extension
 Added BuildMap to group different version assets <font color=#0050FF>(right-click to Create/AssetBundle Broswer Plus/Bundle Build Map Asset)</font>.
 
+### Create BuildMap
+
 ![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/desc_img_1.png)
+
+### Allow Custom Build
 
 ![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/desc_img_2.png)
 
 ![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/desc_img_3.png)
 
+### Switch AssetDatabase
+
 When switch data source will not auto reload AssetDatabase, you will see Configure tab will appear exclamation mark messages but doesn't matter. If you want reload AssetDatabase by build map, you just manual press refresh button in left-top <font color=#FF0000>(If you have many assets will take a long time for reloading)</font>.
 
 ![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/desc_img_4.png)
 
-Auto Refresh <font color=#FF0000>(Not Recommend)</font>
+### Auto Refresh <font color=#FF0000>(Not Recommend)</font>
 
 ![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/desc_img_5.png)
+
+### Refresh Specific Bundle <font color=#FF0000>(Recommend)</font>
 
 When switch data source if has exclamation mark messages you can right-click on bundle tree to refresh a specific bundle more efficiency (don't need to refresh all), and you have changed asset path, rename asset name, delete asset from project you can also right-click to refresh.
 
 ![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/desc_img_6.png)
 
 ![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/desc_img_7.png)
+
+### Sync Bundle To Specified BuildMap
+
+![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/desc_img_8.gif)
 
 # Installation
 ### Install via git URL

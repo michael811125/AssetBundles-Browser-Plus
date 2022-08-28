@@ -3,8 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEditor.IMGUI.Controls;
 using System.Linq;
-using System;
-
+using AssetBundleBrowser.AssetBundleDataSource;
 
 namespace AssetBundleBrowser
 {
@@ -214,7 +213,7 @@ namespace AssetBundleBrowser
                 if (selectedNodes[0].bundle.IsMessageSet(MessageSystem.MessageFlag.AssetsDuplicatedInMultBundles))
                 {
                     menu.AddItem(new GUIContent("Move duplicates to new bundle"), false, DedupeAllBundles, selectedNodes);
-                    menu.AddItem(new GUIContent("Move duplicates separate by asset name into <dependencies> folder"), false, DedupeSepareteBundles, selectedNodes);
+                    menu.AddItem(new GUIContent("Move duplicates named by name into <dependencies> folder"), false, DedupeSepareteBundles, selectedNodes);
                 }
                 menu.AddItem(new GUIContent("Rename"), false, RenameBundle, selectedNodes);
                 menu.AddItem(new GUIContent("Delete " + selectedNodes[0].displayName), false, DeleteBundles, selectedNodes);
@@ -227,7 +226,7 @@ namespace AssetBundleBrowser
             {
                 menu.AddItem(new GUIContent("Move duplicates shared by selected"), false, DedupeOverlappedBundles, selectedNodes);
                 menu.AddItem(new GUIContent("Move duplicates existing in any selected"), false, DedupeAllBundles, selectedNodes);
-                menu.AddItem(new GUIContent("Move duplicates by selected and separate by asset name into <dependencies> folder"), false, DedupeSepareteBundles, selectedNodes);
+                menu.AddItem(new GUIContent("Move duplicates named by name and by selected into <dependencies> folder"), false, DedupeSepareteBundles, selectedNodes);
                 menu.AddItem(new GUIContent("Delete " + selectedNodes.Count + " selected bundles"), false, DeleteBundles, selectedNodes);
                 if (typeof(BundleBuildMap).IsInstanceOfType(AssetBundleModel.Model.DataSource))
                 {
