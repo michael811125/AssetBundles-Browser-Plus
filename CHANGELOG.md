@@ -1,5 +1,8 @@
 # Changelog (unofficial)
 
+## [1.5.1] - 2022-08-29
+- Fixed when enabled sync has refresh issue (do refresh all or refresh specific).
+
 ## [1.5.0] - 2022-08-29
 - Added Sync feature for BuildMap. When drag a bundle to BuildMap can sync to specified BuildMap.
 - Added namespace AssetBundleBrowser.AssetBundleDataSource for BundleBuildMap class.

@@ -472,6 +472,17 @@ namespace AssetBundleBrowser
         {
             if (typeof(BundleBuildMap).IsInstanceOfType(AssetBundleModel.Model.DataSource))
             {
+                // sync to specified buildMap
+                if ((AssetBundleModel.Model.DataSource as BundleBuildMap).enableBundleSync)
+                {
+                    foreach (var bundleSyncMap in (AssetBundleModel.Model.DataSource as BundleBuildMap).bundleSyncMaps.ToArray())
+                    {
+                        if (!bundleSyncMap.sync || bundleSyncMap.bundleBuildMap == null) continue;
+                        bundleSyncMap.bundleBuildMap.RefreshAllAssetBundle();
+                    }
+                }
+
+                // last refresh current data source
                 (AssetBundleModel.Model.DataSource as BundleBuildMap).RefreshAllAssetBundle();
             }
         }

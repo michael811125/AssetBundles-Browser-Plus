@@ -192,7 +192,7 @@ namespace AssetBundleBrowser.AssetBundleDataSource
             if (samples.Count > 0)
             {
                 decimal max = samples.Keys.Max();
-                Debug.Log($"<color=#FFE733>BundleName: {bundleName},</color> <color=#FF9933>Most Similar ({(max * 100).ToString("f2")}%) => Replace</color> <color=#33D6FF>old AssetPath: {samples[max].assetPath}</color> <color=#FF9933>to</color> <color=#A4FF33>new AssetPath:{tAssetPath}</color>");
+                Debug.Log($"<color=#FF1FF9>DataSourceName: {this.sourceName},</color> <color=#FFE733>BundleName: {bundleName},</color> <color=#FF9933>Most Similar ({(max * 100).ToString("f2")}%) => Replace</color> <color=#33D6FF>old AssetPath: {samples[max].assetPath}</color> <color=#FF9933>to</color> <color=#A4FF33>new AssetPath:{tAssetPath}</color>");
                 return samples[max];
             }
 
@@ -387,7 +387,21 @@ namespace AssetBundleBrowser.AssetBundleDataSource
                 }
             }
 
-            if (bundleNames.Count > 0) this.RefreshAllAssetBundle(bundleNames.ToArray());
+            if (bundleNames.Count > 0)
+            {
+                // sync to specified buildMap
+                if (this.enableBundleSync)
+                {
+                    foreach (var bundleSyncMap in this.bundleSyncMaps.ToArray())
+                    {
+                        if (!bundleSyncMap.sync || bundleSyncMap.bundleBuildMap == null) continue;
+                        bundleSyncMap.bundleBuildMap.RefreshAllAssetBundle(bundleNames.ToArray());
+                    }
+                }
+
+                // last refresh current data source
+                this.RefreshAllAssetBundle(bundleNames.ToArray());
+            }
         }
 
         public CustomBuildMap[] GetCustomBuildMaps()
