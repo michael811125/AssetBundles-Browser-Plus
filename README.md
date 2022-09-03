@@ -41,6 +41,31 @@ When enabled sync feature, recommend refresh specific a bundle instead of refres
 
 ![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/desc_img_8.gif)
 
+### Custom Your BuildTool
+
+```
+    // your BundleBuildMap assetPath.
+    string assetPath = "Assets/BuildMaps/MyBundleMap.asset"
+	// load BundleBuildMap
+    var bundleBuildMap = AssetDatabase.LoadAssetAtPath<BundleBuildMap>(assetPath);
+    if (bundleBuildMap == null)
+    {
+        Debug.Log($"Error in LoadAssetAtPath: {assetPath}");
+        return;
+    }
+	
+	// outPath
+	string fullBundleOutPath = = Path.Combine(Application.dataPath, $"../AssetBundles/MyBundle");
+	
+	// platform
+	BuildTarget target = BuildTarget.StandaloneWindows;
+	
+	// LZ4
+	BuildAssetBundleOptions bundleOptions = BuildAssetBundleOptions.ChunkBasedCompression;
+	
+	BundleBuildMap.BuildAssetBundles(fullBundleOutPath, bundleBuildMap.GetBuildMap(), bundleOptions, target, null);
+```
+
 # Installation
 ### Install via git URL
 Add https://github.com/michael811125/AssetBundles-Browser-Plus.git to Package Manager.
