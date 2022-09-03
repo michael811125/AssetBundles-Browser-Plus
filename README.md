@@ -46,7 +46,7 @@ When enabled sync feature, recommend refresh specific a bundle instead of refres
 ```
     // your BundleBuildMap assetPath.
     string assetPath = "Assets/BuildMaps/MyBundleMap.asset"
-	// load BundleBuildMap
+    // load BundleBuildMap
     var bundleBuildMap = AssetDatabase.LoadAssetAtPath<BundleBuildMap>(assetPath);
     if (bundleBuildMap == null)
     {
@@ -54,16 +54,16 @@ When enabled sync feature, recommend refresh specific a bundle instead of refres
         return;
     }
 	
-	// outPath
-	string fullBundleOutPath = = Path.Combine(Application.dataPath, $"../AssetBundles/MyBundle");
+    // outPath
+    string fullBundleOutPath = Path.Combine(Application.dataPath, $"../AssetBundles/MyBundle");
 	
-	// platform
-	BuildTarget target = BuildTarget.StandaloneWindows;
+    // platform
+    BuildTarget target = BuildTarget.StandaloneWindows;
 	
-	// LZ4
-	BuildAssetBundleOptions bundleOptions = BuildAssetBundleOptions.ChunkBasedCompression;
+    // LZ4
+    BuildAssetBundleOptions bundleOptions = BuildAssetBundleOptions.ChunkBasedCompression;
 	
-	BundleBuildMap.BuildAssetBundles(fullBundleOutPath, bundleBuildMap.GetBuildMap(), bundleOptions, target, null);
+    BundleBuildMap.BuildAssetBundles(fullBundleOutPath, bundleBuildMap.GetBuildMap(), bundleOptions, target, null);
 ```
 
 # Installation
