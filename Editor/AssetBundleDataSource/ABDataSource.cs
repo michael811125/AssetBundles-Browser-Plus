@@ -54,6 +54,24 @@ namespace AssetBundleBrowser.AssetBundleDataSource
             set { m_buildMap = value; }
         }
         private List<AssetBundleBuild> m_buildMap;
+        /// <summary>
+        /// Remove manifest from build folder
+        /// </summary>
+        public bool withoutManifest
+        {
+            get { return m_withoutManifest; }
+            set { m_withoutManifest = value; }
+        }
+        private bool m_withoutManifest;
+        /// <summary>
+        /// Replace by hash
+        /// </summary>
+        public bool replaceByHash
+        {
+            get { return m_replaceByHash; }
+            set { m_replaceByHash = value; }
+        }
+        private bool m_replaceByHash;
     }
 
     /// <summary>

@@ -509,7 +509,7 @@ namespace AssetBundleBrowser.AssetBundleDataSource
                         string buildName = string.IsNullOrEmpty(this.customBuildMaps[i].buildName) ? this.customBuildMaps[i].bundleBuildMap.sourceName : this.customBuildMaps[i].buildName;
                         string outputDirectory = $"{info.outputDirectory}/{this.customBuildMaps[i].bundleBuildMap.sourceName}/{buildName}";
 
-                        if (BuildAssetBundles(outputDirectory, this.customBuildMaps[i].bundleBuildMap.GetBuildMap(), info.options, info.buildTarget, null))
+                        if (BuildAssetBundles(outputDirectory, this.customBuildMaps[i].bundleBuildMap.GetBuildMap(), info.options, info.buildTarget, info.withoutManifest, info.replaceByHash, null))
                         {
                             stringBuilder.Append($"<color=#9DFF42>[Source Name: {this.customBuildMaps[i].bundleBuildMap.sourceName}, Build Name: {buildName}] Build Result => Success</color>\n");
                         }
@@ -520,14 +520,56 @@ namespace AssetBundleBrowser.AssetBundleDataSource
                     }
 
                     Debug.Log(stringBuilder.ToString());
+
+                    return true;
                 }
             }
             else
             {
-                return BuildAssetBundles(info.outputDirectory, this.GetBuildMap(), info.options, info.buildTarget, info.onBuild);
+                return BuildAssetBundles(info.outputDirectory, this.GetBuildMap(), info.options, info.buildTarget, info.withoutManifest, info.replaceByHash, info.onBuild);
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// BuildAssetBundles (including remove manifest, replace by hash)
+        /// </summary>
+        /// <param name="outputDirectory"></param>
+        /// <param name="buildMap"></param>
+        /// <param name="options"></param>
+        /// <param name="buildTarget"></param>
+        /// <param name="withoutManifest"></param>
+        /// <param name="replaceByHash"></param>
+        /// <param name="onBuild"></param>
+        /// <returns></returns>
+        public static bool BuildAssetBundles(string outputDirectory, AssetBundleBuild[] buildMap, BuildAssetBundleOptions options, BuildTarget buildTarget, bool withoutManifest, bool replaceByHash, Action<string> onBuild)
+        {
+            if (!Directory.Exists(outputDirectory)) Directory.CreateDirectory(outputDirectory);
+
+            // set option first
+            if (replaceByHash) options |= BuildAssetBundleOptions.AppendHashToAssetBundleName;
+
+            var buildManifest = BuildPipeline.BuildAssetBundles(outputDirectory, buildMap, options, buildTarget);
+            if (buildManifest == null)
+            {
+                Debug.Log("Error in build");
+                return false;
+            }
+
+            // after build
+            if (withoutManifest) AssetBundleBuildTab.WithoutManifestFile(outputDirectory);
+            if (replaceByHash) AssetBundleBuildTab.ReplaceBundleNameByHash(outputDirectory);
+
+            if (onBuild != null)
+            {
+                foreach (var assetBundleName in buildManifest.GetAllAssetBundles())
+                {
+                    onBuild(assetBundleName);
+                }
+            }
+
+            return true;
         }
 
         public static bool BuildAssetBundles(string outputDirectory, AssetBundleBuild[] buildMap, BuildAssetBundleOptions options, BuildTarget buildTarget, Action<string> onBuild)

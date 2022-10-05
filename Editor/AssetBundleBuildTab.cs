@@ -5,6 +5,7 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
 using AssetBundleBrowser.AssetBundleDataSource;
+using System.Linq;
 
 namespace AssetBundleBrowser
 {
@@ -24,7 +25,8 @@ namespace AssetBundleBrowser
 
         class ToggleData
         {
-            internal ToggleData(bool s,
+            internal ToggleData(
+                bool s,
                 string title,
                 string tooltip,
                 List<string> onToggles,
@@ -54,6 +56,8 @@ namespace AssetBundleBrowser
         ToggleData m_CopyToStreaming;
         GUIContent m_TargetContent;
         GUIContent m_CompressionContent;
+        GUIContent m_BundleNameContent;
+
         internal enum CompressOptions
         {
             Uncompressed = 0,
@@ -68,6 +72,18 @@ namespace AssetBundleBrowser
         };
         int[] m_CompressionValues = { 0, 1, 2 };
 
+        internal enum BundleNameOptions
+        {
+            None,
+            AppendHash,
+            ReplaceByHash
+        }
+        GUIContent[] m_BundleNameOptions = {
+            new GUIContent("None"),
+            new GUIContent("Append Hash To Bundle Name"),
+            new GUIContent("Replace Bundle Name By Hash")
+        };
+        int[] m_BundleNameValues = { 0, 1, 2 };
 
         internal AssetBundleBuildTab()
         {
@@ -128,12 +144,12 @@ namespace AssetBundleBrowser
                 "Ignore the type tree changes when doing the incremental build check.",
                 m_UserData.m_OnToggles,
                 BuildAssetBundleOptions.IgnoreTypeTreeChanges));
-            m_ToggleData.Add(new ToggleData(
-                false,
-                "Append Hash",
-                "Append the hash to the assetBundle name.",
-                m_UserData.m_OnToggles,
-                BuildAssetBundleOptions.AppendHashToAssetBundleName));
+            //m_ToggleData.Add(new ToggleData(
+            //    false,
+            //    "Append Hash",
+            //    "Append the hash to the assetBundle name.",
+            //    m_UserData.m_OnToggles,
+            //    BuildAssetBundleOptions.AppendHashToAssetBundleName));
             m_ToggleData.Add(new ToggleData(
                 false,
                 "Strict Mode",
@@ -146,7 +162,12 @@ namespace AssetBundleBrowser
                 "Do a dry run build.",
                 m_UserData.m_OnToggles,
                 BuildAssetBundleOptions.DryRunBuild));
-
+            m_ToggleData.Add(new ToggleData(
+                false,
+                "Without Manifest",
+                "When build finished do remove menifest files.",
+                m_UserData.m_OnToggles
+                ));
 
             m_ForceRebuild = new ToggleData(
                 false,
@@ -161,6 +182,7 @@ namespace AssetBundleBrowser
 
             m_TargetContent = new GUIContent("Build Target", "Choose target platform to build for.");
             m_CompressionContent = new GUIContent("Compression", "Choose no compress, standard (LZMA), or chunk based (LZ4)");
+            m_BundleNameContent = new GUIContent("Bundle Name", "Choose none, append hash, or replace by hash (Including manifest)");
 
             if (m_UserData.m_UseDefaultPath)
             {
@@ -195,8 +217,7 @@ namespace AssetBundleBrowser
                 }
             }
 
-
-            ////output path
+            //output path
             using (new EditorGUI.DisabledScope(!AssetBundleModel.Model.DataSource.CanSpecifyBuildOutputDirectory))
             {
                 EditorGUILayout.Space();
@@ -272,6 +293,18 @@ namespace AssetBundleBrowser
                     {
                         m_UserData.m_Compression = cmp;
                     }
+
+                    BundleNameOptions bundleNameOption = (BundleNameOptions)EditorGUILayout.IntPopup(
+                        m_BundleNameContent,
+                        (int)m_UserData.m_BundleNameOption,
+                        m_BundleNameOptions,
+                        m_BundleNameValues);
+
+                    if (bundleNameOption != m_UserData.m_BundleNameOption)
+                    {
+                        m_UserData.m_BundleNameOption = bundleNameOption;
+                    }
+
                     foreach (var tog in m_ToggleData)
                     {
                         newState = EditorGUILayout.ToggleLeft(
@@ -279,7 +312,6 @@ namespace AssetBundleBrowser
                             tog.state);
                         if (newState != tog.state)
                         {
-
                             if (newState)
                                 m_UserData.m_OnToggles.Add(tog.content.text);
                             else
@@ -350,16 +382,30 @@ namespace AssetBundleBrowser
 
             BuildAssetBundleOptions opt = BuildAssetBundleOptions.None;
 
+            bool withoutMenifest = false;
+            bool replaceByHash = false;
             if (AssetBundleModel.Model.DataSource.CanSpecifyBuildOptions)
             {
+                // compression
                 if (m_UserData.m_Compression == CompressOptions.Uncompressed)
                     opt |= BuildAssetBundleOptions.UncompressedAssetBundle;
                 else if (m_UserData.m_Compression == CompressOptions.ChunkBasedCompression)
                     opt |= BuildAssetBundleOptions.ChunkBasedCompression;
+
+                // bundle name
+                if (m_UserData.m_BundleNameOption == BundleNameOptions.AppendHash)
+                    opt |= BuildAssetBundleOptions.AppendHashToAssetBundleName;
+                else if (m_UserData.m_BundleNameOption == BundleNameOptions.ReplaceByHash)
+                {
+                    opt |= BuildAssetBundleOptions.AppendHashToAssetBundleName;
+                    replaceByHash = true;
+                }
+
+                // toggle options
                 foreach (var tog in m_ToggleData)
                 {
-                    if (tog.state)
-                        opt |= tog.option;
+                    if (tog.content.text == "Without Manifest") withoutMenifest = tog.state;
+                    else if (tog.state) opt |= tog.option;
                 }
             }
 
@@ -375,13 +421,14 @@ namespace AssetBundleBrowser
                 m_InspectTab.AddBundleFolder(buildInfo.outputDirectory);
                 m_InspectTab.RefreshBundles();
             };
+            buildInfo.withoutManifest = withoutMenifest;
+            buildInfo.replaceByHash = replaceByHash;
 
             AssetBundleModel.Model.DataSource.BuildAssetBundles(buildInfo);
 
             AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
 
-            if (m_CopyToStreaming.state)
-                DirectoryCopy(m_UserData.m_OutputPath, m_streamingPath);
+            if (m_CopyToStreaming.state) DirectoryCopy(m_UserData.m_OutputPath, m_streamingPath);
         }
 
         private static void DirectoryCopy(string sourceDirName, string destDirName)
@@ -443,6 +490,79 @@ namespace AssetBundleBrowser
             //EditorUserBuildSettings.SetPlatformSettings(EditorUserBuildSettings.activeBuildTarget.ToString(), "AssetBundleOutputPath", m_OutputPath);
         }
 
+        /// <summary>
+        /// Remove manifest file from build folder
+        /// </summary>
+        /// <param name="outputDirectory"></param>
+        internal static void WithoutManifestFile(string outputDirectory)
+        {
+            // filter only extension is manifest
+            string[] files = Directory.GetFiles(outputDirectory, "*.manifest", SearchOption.AllDirectories);
+            foreach (string file in files)
+            {
+                if (File.Exists(file)) File.Delete(file);
+            }
+        }
+
+        /// <summary>
+        /// Repace bundle name by hash (keep hash)
+        /// </summary>
+        /// <param name="outputDirectory"></param>
+        internal static void ReplaceBundleNameByHash(string outputDirectory)
+        {
+            // set replacement map for manifest file to replace hash
+            Dictionary<string, string> dictReplacement = new Dictionary<string, string>();
+
+            // get all file
+            string[] files = Directory.GetFiles(outputDirectory, "*.*", SearchOption.AllDirectories);
+            foreach (var file in files)
+            {
+                // get fileName without extension
+                string fileName = Path.GetFileNameWithoutExtension(file);
+
+                // Hash128 = 16 bytes (hex str => 0xFF = 1 bytes = 1 set, 16 * 2 = 32)
+                int hashSize = 32;
+
+                // append hash has _
+                var lastIdx = file.LastIndexOf("_");
+                // path \ for win, / for mac, linux 
+                var firstIdx = (file.LastIndexOf("\\") == -1 ? file.LastIndexOf("/") : file.LastIndexOf("\\"));
+
+                // fileName.Length > hashSize = including hash code
+                if (lastIdx != -1 && firstIdx != -1 && fileName.Length > hashSize)
+                {
+                    string originFileName = file.Substring(firstIdx + 1, lastIdx - firstIdx - 1);
+                    string hash = file.Substring(firstIdx + 2 + originFileName.Length, hashSize);
+
+                    // set pair
+                    dictReplacement.Add(originFileName, hash);
+
+                    // replace origin file name to empty (only keep hash code)
+                    string newFile = file.Replace($"{originFileName}_", string.Empty);
+
+                    // rename it
+                    if (File.Exists(file)) File.Move(file, newFile);
+                }
+            }
+
+            // get all manifest file
+            string[] manifestFiles = Directory.GetFiles(outputDirectory, "*.manifest", SearchOption.AllDirectories);
+            foreach (string file in manifestFiles)
+            {
+                foreach (var pair in dictReplacement)
+                {
+                    string originFileName = pair.Key;
+                    string hash = pair.Value;
+
+                    if (file.IndexOf(originFileName) != -1)
+                    {
+                        string newFile = file.Replace(originFileName, hash);
+                        if (File.Exists(file)) File.Move(file, newFile);
+                    }
+                }
+            }
+        }
+
         //Note: this is the provided BuildTarget enum with some entries removed as they are invalid in the dropdown
         internal enum ValidBuildTarget
         {
@@ -486,6 +606,7 @@ namespace AssetBundleBrowser
             internal List<string> m_OnToggles;
             internal ValidBuildTarget m_BuildTarget = ValidBuildTarget.StandaloneWindows;
             internal CompressOptions m_Compression = CompressOptions.StandardCompression;
+            internal BundleNameOptions m_BundleNameOption = BundleNameOptions.None;
             internal string m_OutputPath = string.Empty;
             internal bool m_UseDefaultPath = true;
         }

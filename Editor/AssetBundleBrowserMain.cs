@@ -288,7 +288,7 @@ namespace AssetBundleBrowser
                         new GUIContent
                         (
                             "Auto Refresh",
-                            "If checked will auto reload data source on open and switch other data source also will auto reload. (Not Recommend, when you have many assets will take a long time to load. *Recommend press refresh button manually.)"
+                            "If checked will auto reload data source on open and switch other data source. (Not Recommend, when you have many assets will take a long time to load. *Recommend press refresh button manually.)"
                         )
                     );
                     EditorPrefs.SetBool(KEY_AUTO_REFRESH, _autoRefresh);
