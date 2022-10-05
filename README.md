@@ -62,13 +62,13 @@ When enabled sync feature can sync asset data to other BuildMap <font color=#005
 	
     // LZ4
     BuildAssetBundleOptions bundleOptions = BuildAssetBundleOptions.ChunkBasedCompression;
-	
+    
     BundleBuildMap.BuildAssetBundles(fullBundleOutPath, bundleBuildMap.GetBuildMap(), bundleOptions, target, null);
-	
-	// including withoutManifest and replaceByHash params
-	bool withoutManifest = true;
-	bool replaceByHash = true;
-	BundleBuildMap.BuildAssetBundles(fullBundleOutPath, bundleBuildMap.GetBuildMap(), bundleOptions, target, withoutManifest, replaceByHash, null);
+    
+    // including withoutManifest and replaceByHash params
+    bool withoutManifest = true;
+    bool replaceByHash = true;
+    BundleBuildMap.BuildAssetBundles(fullBundleOutPath, bundleBuildMap.GetBuildMap(), bundleOptions, target, withoutManifest, replaceByHash, null);
 ```
 
 ### Extension Advenced Settings
@@ -82,6 +82,15 @@ When enabled sync feature can sync asset data to other BuildMap <font color=#005
 # Installation
 ### Install via git URL
 Add https://github.com/michael811125/AssetBundles-Browser-Plus.git to Package Manager.
+
+### Install via OpenUPM
+The package is available on the openupm registry. It's recommended to install it via openupm-cli.
+
+https://openupm.com/packages/com.michaelo.assetbundlebrowser.plus/?subPage=readme
+
+```
+openupm add com.michaelo.assetbundlebrowser.plus
+```
 
 ## Full Documentation
 #### Official Released Features
