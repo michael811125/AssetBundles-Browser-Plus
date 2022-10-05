@@ -1,5 +1,10 @@
 # Changelog (unofficial)
 
+## [1.6.0] - 2022-10-05
+- Added WithoutManifest feature for build advenced settings.
+- Added ReplaceByHash feature for build advenced settings.
+- Added overload BuildAssetBundles() method with withoutManifest and replayceByHash params for custom build.
+
 ## [1.5.1] - 2022-08-29
 - Fixed when enabled sync has refresh issue (do refresh all or refresh specific).
 
