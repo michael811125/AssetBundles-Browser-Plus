@@ -76,7 +76,7 @@ When enabled sync feature can sync asset data to other BuildMap <font color=#005
 
 - WithoutManifest : after build remove manifest file from build folder.
 
-- ReplaceByHash : after build replace asset bundle name to empty only keep hash (including manifest).
+- ReplaceByHash : after build load manifest from build folder to read hash to replace.
 
 ![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/desc_img_9.png)
 
