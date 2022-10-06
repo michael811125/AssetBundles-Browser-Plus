@@ -492,11 +492,18 @@ namespace AssetBundleBrowser
         /// <param name="outputDirectory"></param>
         internal static bool WithoutManifestFile(string outputDirectory)
         {
-            // filter only extension is manifest
-            string[] files = Directory.GetFiles(outputDirectory, "*.manifest", SearchOption.AllDirectories);
-            foreach (string file in files)
+            try
             {
-                if (File.Exists(file)) File.Delete(file);
+                // filter only extension is manifest
+                string[] files = Directory.GetFiles(outputDirectory, "*.manifest", SearchOption.AllDirectories);
+                foreach (string file in files)
+                {
+                    if (File.Exists(file)) File.Delete(file);
+                }
+            }
+            catch
+            {
+                return false;
             }
 
             return true;
@@ -518,33 +525,43 @@ namespace AssetBundleBrowser
             string[] files = Directory.GetFiles(outputDirectory, "*.*", SearchOption.AllDirectories);
             foreach (var file in files)
             {
-                if (file.IndexOf(manifestName) != -1)
+                // check whole path (manifest will build in outputDirectory)
+                if (file.IndexOf(Path.Combine(outputDirectory, manifestName)) != -1)
                 {
                     manifestFullPath = Path.GetFullPath(file);
                     break;
                 }
             }
 
-            // file stream to read manifest
-            var fs = new FileStream(manifestFullPath, FileMode.Open, FileAccess.Read, FileShare.None);
-            var bundle = AssetBundle.LoadFromStream(fs);
-            fs.Dispose();
+            if (string.IsNullOrEmpty(manifestFullPath)) return false;
 
-            // load manifest asset
-            AssetBundleManifest manifest = bundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-
-            // replace all bundle file name by hash
-            foreach (var file in files)
+            try
             {
-                string bundleName = file.Replace(outputDirectory, string.Empty);
-                bundleName = bundleName.Substring(1, bundleName.Length - 1);
-                // skip process manifest & .manifest extension
-                if (bundleName.IndexOf(manifestName) != -1 || file.IndexOf(".manifest") != -1) continue;
+                // file stream to read manifest
+                var fs = new FileStream(manifestFullPath, FileMode.Open, FileAccess.Read, FileShare.None);
+                var bundle = AssetBundle.LoadFromStream(fs);
+                fs.Dispose();
 
-                string fileName = Path.GetFileNameWithoutExtension(file);
-                string hash = manifest.GetAssetBundleHash(bundleName).ToString();
-                string newFile = file.Replace(fileName, hash);
-                if (File.Exists(file)) File.Move(file, newFile);
+                // load manifest asset
+                AssetBundleManifest manifest = bundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+
+                // replace all bundle file name by hash
+                foreach (var file in files)
+                {
+                    string bundleName = file.Replace(outputDirectory, string.Empty);
+                    bundleName = bundleName.Substring(1, bundleName.Length - 1);
+                    // skip process manifest & .manifest extension
+                    if (bundleName.IndexOf(manifestName) != -1 || file.IndexOf(".manifest") != -1) continue;
+
+                    string fileName = Path.GetFileNameWithoutExtension(file);
+                    string hash = manifest.GetAssetBundleHash(bundleName).ToString();
+                    string newFile = file.Replace(fileName, hash);
+                    if (File.Exists(file)) File.Move(file, newFile);
+                }
+            }
+            catch
+            {
+                return false;
             }
 
             return true;

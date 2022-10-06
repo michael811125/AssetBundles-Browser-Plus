@@ -37,7 +37,7 @@ When switch data source if has exclamation mark messages you can right-click on 
 
 ### Sync Bundle To Specified BuildMap
 
-When enabled sync feature can sync asset data to other BuildMap <font color=#0050FF>(recommend refresh specific a bundle instead of refresh all)</font>.
+When enabled sync feature can sync asset data to other BuildMap <font color=#FF0000>(recommend refresh specific a bundle instead of refresh all)</font>.
 
 ![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/desc_img_8.gif)
 

@@ -1,5 +1,8 @@
 # Changelog (unofficial)
 
+## [1.6.2] - 2022-10-06
+- Fixed replace by hash feature has load manifest file from local error issue.
+
 ## [1.6.1] - 2022-10-06
 - Modified ReplaceByHash feature load manifest from build folder to replace, not use append hash to bundle name to replace.
 

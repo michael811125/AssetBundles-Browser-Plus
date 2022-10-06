@@ -558,7 +558,7 @@ namespace AssetBundleBrowser.AssetBundleDataSource
             if (withoutManifest)
             {
                 bool completes = AssetBundleBuildTab.WithoutManifestFile(outputDirectory);
-                if (!completes) Debug.Log("Error in process remove manifest.");
+                if (!completes) Debug.Log("<color=#FF0000>Error in process remove manifest.</color>");
                 else Debug.Log($"<color=#60ffb0>Remove all manifest file completes.</color>");
             }
 
@@ -566,7 +566,7 @@ namespace AssetBundleBrowser.AssetBundleDataSource
             if (replaceByHash)
             {
                 bool completes = AssetBundleBuildTab.ReplaceBundleNameByHash(outputDirectory);
-                if (!completes) Debug.Log("Error in process replace by hash.");
+                if (!completes) Debug.Log("<color=#FF0000>Error in process replace by hash.</color>");
                 else Debug.Log($"<color=#60ffb0>Replace all bundle name by hash completes.</color>");
             }
 
