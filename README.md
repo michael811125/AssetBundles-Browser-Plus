@@ -63,7 +63,7 @@ When enabled sync feature can sync asset data to other BuildMap <font color=#005
     // LZ4
     BuildAssetBundleOptions bundleOptions = BuildAssetBundleOptions.ChunkBasedCompression;
     
-	// regular
+    // regular
     BundleBuildMap.BuildAssetBundles(outputDirectory, bundleBuildMap.GetBuildMap(), bundleOptions, target, null);
     
     // including withoutManifest and replaceByHash params
