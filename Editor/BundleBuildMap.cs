@@ -547,9 +547,6 @@ namespace AssetBundleBrowser.AssetBundleDataSource
         {
             if (!Directory.Exists(outputDirectory)) Directory.CreateDirectory(outputDirectory);
 
-            // set option first
-            if (replaceByHash) options |= BuildAssetBundleOptions.AppendHashToAssetBundleName;
-
             var buildManifest = BuildPipeline.BuildAssetBundles(outputDirectory, buildMap, options, buildTarget);
             if (buildManifest == null)
             {
@@ -557,9 +554,21 @@ namespace AssetBundleBrowser.AssetBundleDataSource
                 return false;
             }
 
-            // after build
-            if (withoutManifest) AssetBundleBuildTab.WithoutManifestFile(outputDirectory);
-            if (replaceByHash) AssetBundleBuildTab.ReplaceBundleNameByHash(outputDirectory);
+            // after build (without manifest)
+            if (withoutManifest)
+            {
+                bool completes = AssetBundleBuildTab.WithoutManifestFile(outputDirectory);
+                if (!completes) Debug.Log("Error in process remove manifest.");
+                else Debug.Log($"<color=#60ffb0>Remove all manifest file completes.</color>");
+            }
+
+            // after build (replace by hash)
+            if (replaceByHash)
+            {
+                bool completes = AssetBundleBuildTab.ReplaceBundleNameByHash(outputDirectory);
+                if (!completes) Debug.Log("Error in process replace by hash.");
+                else Debug.Log($"<color=#60ffb0>Replace all bundle name by hash completes.</color>");
+            }
 
             if (onBuild != null)
             {

@@ -54,8 +54,8 @@ When enabled sync feature can sync asset data to other BuildMap <font color=#005
         return;
     }
 	
-    // outPath
-    string fullBundleOutPath = Path.Combine(Application.dataPath, $"../AssetBundles/MyBundle");
+    // output path
+    string outputDirectory = Path.Combine(Application.dataPath, $"../AssetBundles/MyBundle");
 	
     // platform
     BuildTarget target = BuildTarget.StandaloneWindows;
@@ -63,12 +63,13 @@ When enabled sync feature can sync asset data to other BuildMap <font color=#005
     // LZ4
     BuildAssetBundleOptions bundleOptions = BuildAssetBundleOptions.ChunkBasedCompression;
     
-    BundleBuildMap.BuildAssetBundles(fullBundleOutPath, bundleBuildMap.GetBuildMap(), bundleOptions, target, null);
+	// regular
+    BundleBuildMap.BuildAssetBundles(outputDirectory, bundleBuildMap.GetBuildMap(), bundleOptions, target, null);
     
     // including withoutManifest and replaceByHash params
     bool withoutManifest = true;
     bool replaceByHash = true;
-    BundleBuildMap.BuildAssetBundles(fullBundleOutPath, bundleBuildMap.GetBuildMap(), bundleOptions, target, withoutManifest, replaceByHash, null);
+    BundleBuildMap.BuildAssetBundles(outputDirectory, bundleBuildMap.GetBuildMap(), bundleOptions, target, withoutManifest, replaceByHash, null);
 ```
 
 ### Extension Advenced Settings

@@ -3,9 +3,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-
 using AssetBundleBrowser.AssetBundleDataSource;
-using System.Linq;
 
 namespace AssetBundleBrowser
 {
@@ -182,7 +180,7 @@ namespace AssetBundleBrowser
 
             m_TargetContent = new GUIContent("Build Target", "Choose target platform to build for.");
             m_CompressionContent = new GUIContent("Compression", "Choose no compress, standard (LZMA), or chunk based (LZ4)");
-            m_BundleNameContent = new GUIContent("Bundle Name", "Choose none, append hash, or replace by hash (Including manifest)");
+            m_BundleNameContent = new GUIContent("Bundle Name", "Choose none, append hash, or replace by hash");
 
             if (m_UserData.m_UseDefaultPath)
             {
@@ -396,10 +394,7 @@ namespace AssetBundleBrowser
                 if (m_UserData.m_BundleNameOption == BundleNameOptions.AppendHash)
                     opt |= BuildAssetBundleOptions.AppendHashToAssetBundleName;
                 else if (m_UserData.m_BundleNameOption == BundleNameOptions.ReplaceByHash)
-                {
-                    opt |= BuildAssetBundleOptions.AppendHashToAssetBundleName;
                     replaceByHash = true;
-                }
 
                 // toggle options
                 foreach (var tog in m_ToggleData)
@@ -494,7 +489,7 @@ namespace AssetBundleBrowser
         /// Remove manifest file from build folder
         /// </summary>
         /// <param name="outputDirectory"></param>
-        internal static void WithoutManifestFile(string outputDirectory)
+        internal static bool WithoutManifestFile(string outputDirectory)
         {
             // filter only extension is manifest
             string[] files = Directory.GetFiles(outputDirectory, "*.manifest", SearchOption.AllDirectories);
@@ -502,65 +497,56 @@ namespace AssetBundleBrowser
             {
                 if (File.Exists(file)) File.Delete(file);
             }
+
+            return true;
         }
 
         /// <summary>
-        /// Repace bundle name by hash (keep hash)
+        /// Repace bundle name by hash (read hash from manifest to replace)
         /// </summary>
         /// <param name="outputDirectory"></param>
-        internal static void ReplaceBundleNameByHash(string outputDirectory)
+        internal static bool ReplaceBundleNameByHash(string outputDirectory)
         {
-            // set replacement map for manifest file to replace hash
-            Dictionary<string, string> dictReplacement = new Dictionary<string, string>();
+            // outputDirectory last path name = manifestName
+            var firstIdx = outputDirectory.LastIndexOf("\\") == -1 ? outputDirectory.LastIndexOf("/") : outputDirectory.LastIndexOf("\\");
+            string manifestName = outputDirectory.Substring(firstIdx + 1, outputDirectory.Length - firstIdx - 1);
 
-            // get all file
+            string manifestFullPath = string.Empty;
+
+            // search from all file to find menifest
             string[] files = Directory.GetFiles(outputDirectory, "*.*", SearchOption.AllDirectories);
             foreach (var file in files)
             {
-                // get fileName without extension
-                string fileName = Path.GetFileNameWithoutExtension(file);
-
-                // Hash128 = 16 bytes (hex str => 0xFF = 1 bytes = 1 set, 16 * 2 = 32)
-                int hashSize = 32;
-
-                // append hash has _
-                var lastIdx = file.LastIndexOf("_");
-                // path \ for win, / for mac, linux 
-                var firstIdx = (file.LastIndexOf("\\") == -1 ? file.LastIndexOf("/") : file.LastIndexOf("\\"));
-
-                // fileName.Length > hashSize = including hash code
-                if (lastIdx != -1 && firstIdx != -1 && fileName.Length > hashSize)
+                if (file.IndexOf(manifestName) != -1)
                 {
-                    string originFileName = file.Substring(firstIdx + 1, lastIdx - firstIdx - 1);
-                    string hash = file.Substring(firstIdx + 2 + originFileName.Length, hashSize);
-
-                    // set pair
-                    dictReplacement.Add(originFileName, hash);
-
-                    // replace origin file name to empty (only keep hash code)
-                    string newFile = file.Replace($"{originFileName}_", string.Empty);
-
-                    // rename it
-                    if (File.Exists(file)) File.Move(file, newFile);
+                    manifestFullPath = Path.GetFullPath(file);
+                    break;
                 }
             }
 
-            // get all manifest file
-            string[] manifestFiles = Directory.GetFiles(outputDirectory, "*.manifest", SearchOption.AllDirectories);
-            foreach (string file in manifestFiles)
+            // file stream to read manifest
+            var fs = new FileStream(manifestFullPath, FileMode.Open, FileAccess.Read, FileShare.None);
+            var bundle = AssetBundle.LoadFromStream(fs);
+            fs.Dispose();
+
+            // load manifest asset
+            AssetBundleManifest manifest = bundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
+
+            // replace all bundle file name by hash
+            foreach (var file in files)
             {
-                foreach (var pair in dictReplacement)
-                {
-                    string originFileName = pair.Key;
-                    string hash = pair.Value;
+                string bundleName = file.Replace(outputDirectory, string.Empty);
+                bundleName = bundleName.Substring(1, bundleName.Length - 1);
+                // skip process manifest & .manifest extension
+                if (bundleName.IndexOf(manifestName) != -1 || file.IndexOf(".manifest") != -1) continue;
 
-                    if (file.IndexOf(originFileName) != -1)
-                    {
-                        string newFile = file.Replace(originFileName, hash);
-                        if (File.Exists(file)) File.Move(file, newFile);
-                    }
-                }
+                string fileName = Path.GetFileNameWithoutExtension(file);
+                string hash = manifest.GetAssetBundleHash(bundleName).ToString();
+                string newFile = file.Replace(fileName, hash);
+                if (File.Exists(file)) File.Move(file, newFile);
             }
+
+            return true;
         }
 
         //Note: this is the provided BuildTarget enum with some entries removed as they are invalid in the dropdown
