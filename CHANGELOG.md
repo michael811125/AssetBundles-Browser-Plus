@@ -1,5 +1,8 @@
 # Changelog (unofficial)
 
+## [1.6.1] - 2022-10-06
+- Modified ReplaceByHash feature load manifest from build folder to replace, not use append hash to bundle name to replace.
+
 ## [1.6.0] - 2022-10-05
 - Added WithoutManifest feature for build advenced settings.
 - Added ReplaceByHash feature for build advenced settings.
