@@ -1,5 +1,9 @@
 # Changelog (unofficial)
 
+## [1.7.0] - 2022-10-12
+- Added ExtendBuildAssetBundleOptions for Advenced Settings (most convenient).
+- Modified BuildAssetBundles method in BundleBuildMap (changed extend options param).
+
 ## [1.6.2] - 2022-10-06
 - Fixed replace by hash feature has load manifest file from local error issue.
 

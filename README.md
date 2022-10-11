@@ -61,18 +61,19 @@ When enabled sync feature can sync asset data to other BuildMap <font color=#FF0
     BuildTarget target = BuildTarget.StandaloneWindows;
 	
     // LZ4
-    BuildAssetBundleOptions bundleOptions = BuildAssetBundleOptions.ChunkBasedCompression;
+    BuildAssetBundleOptions options = BuildAssetBundleOptions.ChunkBasedCompression;
     
     // regular
-    BundleBuildMap.BuildAssetBundles(outputDirectory, bundleBuildMap.GetBuildMap(), bundleOptions, target, null);
+    BundleBuildMap.BuildAssetBundles(outputDirectory, bundleBuildMap.GetBuildMap(), options, target, null);
     
-    // including withoutManifest and replaceByHash params
-    bool withoutManifest = true;
-    bool replaceByHash = true;
-    BundleBuildMap.BuildAssetBundles(outputDirectory, bundleBuildMap.GetBuildMap(), bundleOptions, target, withoutManifest, replaceByHash, null);
+    // including extend options
+    ExtendBuildAssetBundleOptions extdOptions = ExtendBuildAssetBundleOptions.None;
+    extdOptions |= ExtendBuildAssetBundleOptions.WithoutManifest;
+    extdOptions |= ExtendBuildAssetBundleOptions.ReplaceByHash;
+    BundleBuildMap.BuildAssetBundles(outputDirectory, bundleBuildMap.GetBuildMap(), options, target, extdOptions, null);
 ```
 
-### Extension Advenced Settings
+### Advenced Settings Extension
 
 - WithoutManifest : after build remove manifest file from build folder.
 

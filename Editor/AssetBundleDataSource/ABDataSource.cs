@@ -57,21 +57,27 @@ namespace AssetBundleBrowser.AssetBundleDataSource
         /// <summary>
         /// Remove manifest from build folder
         /// </summary>
-        public bool withoutManifest
-        {
-            get { return m_withoutManifest; }
-            set { m_withoutManifest = value; }
-        }
-        private bool m_withoutManifest;
+        //public bool withoutManifest
+        //{
+        //    get { return m_withoutManifest; }
+        //    set { m_withoutManifest = value; }
+        //}
+        //private bool m_withoutManifest;
         /// <summary>
         /// Replace by hash
         /// </summary>
-        public bool replaceByHash
+        //public bool replaceByHash
+        //{
+        //    get { return m_replaceByHash; }
+        //    set { m_replaceByHash = value; }
+        //}
+        //private bool m_replaceByHash;
+        public ExtendBuildAssetBundleOptions extdOptions
         {
-            get { return m_replaceByHash; }
-            set { m_replaceByHash = value; }
+            get { return m_extdOptions; }
+            set { m_extdOptions = value; }
         }
-        private bool m_replaceByHash;
+        private ExtendBuildAssetBundleOptions m_extdOptions;
     }
 
     /// <summary>

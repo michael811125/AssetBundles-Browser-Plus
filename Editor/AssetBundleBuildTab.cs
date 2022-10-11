@@ -29,7 +29,8 @@ namespace AssetBundleBrowser
                 string title,
                 string tooltip,
                 List<string> onToggles,
-                BuildAssetBundleOptions opt = BuildAssetBundleOptions.None)
+                BuildAssetBundleOptions opt = BuildAssetBundleOptions.None,
+                ExtendBuildAssetBundleOptions extdOpt = ExtendBuildAssetBundleOptions.None)
             {
                 if (onToggles.Contains(title))
                     state = true;
@@ -37,12 +38,14 @@ namespace AssetBundleBrowser
                     state = s;
                 content = new GUIContent(title, tooltip);
                 option = opt;
+                extdOption = extdOpt;
             }
             //internal string prefsKey
             //{ get { return k_BuildPrefPrefix + content.text; } }
             internal bool state;
             internal GUIContent content;
             internal BuildAssetBundleOptions option;
+            internal ExtendBuildAssetBundleOptions extdOption;
         }
 
         private AssetBundleInspectTab m_InspectTab;
@@ -165,8 +168,9 @@ namespace AssetBundleBrowser
                 false,
                 "Without Manifest",
                 "When build finished do remove menifest files.",
-                m_UserData.m_OnToggles
-                ));
+                m_UserData.m_OnToggles,
+                BuildAssetBundleOptions.None,
+                ExtendBuildAssetBundleOptions.WithoutManifest));
 
             m_ForceRebuild = new ToggleData(
                 false,
@@ -380,9 +384,8 @@ namespace AssetBundleBrowser
             }
 
             BuildAssetBundleOptions opt = BuildAssetBundleOptions.None;
+            ExtendBuildAssetBundleOptions extdOpt = ExtendBuildAssetBundleOptions.None;
 
-            bool withoutMenifest = false;
-            bool replaceByHash = false;
             if (AssetBundleModel.Model.DataSource.CanSpecifyBuildOptions)
             {
                 // compression
@@ -395,12 +398,14 @@ namespace AssetBundleBrowser
                 if (m_UserData.m_BundleNameOption == BundleNameOptions.AppendHash)
                     opt |= BuildAssetBundleOptions.AppendHashToAssetBundleName;
                 else if (m_UserData.m_BundleNameOption == BundleNameOptions.ReplaceByHash)
-                    replaceByHash = true;
+                    extdOpt |= ExtendBuildAssetBundleOptions.ReplaceByHash;
 
                 // toggle options
                 foreach (var tog in m_ToggleData)
                 {
-                    if (tog.content.text == "Without Manifest") withoutMenifest = tog.state;
+                    // for extend options
+                    if (tog.extdOption != ExtendBuildAssetBundleOptions.None && tog.state) extdOpt |= tog.extdOption;
+                    // for options
                     else if (tog.state) opt |= tog.option;
                 }
             }
@@ -409,6 +414,7 @@ namespace AssetBundleBrowser
 
             buildInfo.outputDirectory = m_UserData.m_OutputPath;
             buildInfo.options = opt;
+            buildInfo.extdOptions = extdOpt;
             buildInfo.buildTarget = (BuildTarget)m_UserData.m_BuildTarget;
             buildInfo.onBuild = (assetBundleName) =>
             {
@@ -417,8 +423,6 @@ namespace AssetBundleBrowser
                 m_InspectTab.AddBundleFolder(buildInfo.outputDirectory);
                 m_InspectTab.RefreshBundles();
             };
-            buildInfo.withoutManifest = withoutMenifest;
-            buildInfo.replaceByHash = replaceByHash;
 
             AssetBundleModel.Model.DataSource.BuildAssetBundles(buildInfo);
 

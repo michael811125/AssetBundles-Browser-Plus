@@ -509,7 +509,7 @@ namespace AssetBundleBrowser.AssetBundleDataSource
                         string buildName = string.IsNullOrEmpty(this.customBuildMaps[i].buildName) ? this.customBuildMaps[i].bundleBuildMap.sourceName : this.customBuildMaps[i].buildName;
                         string outputDirectory = $"{info.outputDirectory}/{this.customBuildMaps[i].bundleBuildMap.sourceName}/{buildName}";
 
-                        if (BuildAssetBundles(outputDirectory, this.customBuildMaps[i].bundleBuildMap.GetBuildMap(), info.options, info.buildTarget, info.withoutManifest, info.replaceByHash, null))
+                        if (BuildAssetBundles(outputDirectory, this.customBuildMaps[i].bundleBuildMap.GetBuildMap(), info.options, info.buildTarget, info.extdOptions, null))
                         {
                             stringBuilder.Append($"<color=#9DFF42>[Source Name: {this.customBuildMaps[i].bundleBuildMap.sourceName}, Build Name: {buildName}] Build Result => Success</color>\n");
                         }
@@ -526,7 +526,7 @@ namespace AssetBundleBrowser.AssetBundleDataSource
             }
             else
             {
-                return BuildAssetBundles(info.outputDirectory, this.GetBuildMap(), info.options, info.buildTarget, info.withoutManifest, info.replaceByHash, info.onBuild);
+                return BuildAssetBundles(info.outputDirectory, this.GetBuildMap(), info.options, info.buildTarget, info.extdOptions, info.onBuild);
             }
 
             return false;
@@ -543,9 +543,18 @@ namespace AssetBundleBrowser.AssetBundleDataSource
         /// <param name="replaceByHash"></param>
         /// <param name="onBuild"></param>
         /// <returns></returns>
-        public static bool BuildAssetBundles(string outputDirectory, AssetBundleBuild[] buildMap, BuildAssetBundleOptions options, BuildTarget buildTarget, bool withoutManifest, bool replaceByHash, Action<string> onBuild)
+        public static bool BuildAssetBundles(string outputDirectory, AssetBundleBuild[] buildMap, BuildAssetBundleOptions options, BuildTarget buildTarget, ExtendBuildAssetBundleOptions extdOptions, Action<string> onBuild)
         {
             if (!Directory.Exists(outputDirectory)) Directory.CreateDirectory(outputDirectory);
+
+            // if use replaceByHash must remove AppendHashToAssetBundleName option (priority)
+            if (Convert.ToBoolean(extdOptions & ExtendBuildAssetBundleOptions.ReplaceByHash))
+            {
+                if (Convert.ToBoolean(options & BuildAssetBundleOptions.AppendHashToAssetBundleName))
+                {
+                    options ^= BuildAssetBundleOptions.AppendHashToAssetBundleName;
+                }
+            }
 
             var buildManifest = BuildPipeline.BuildAssetBundles(outputDirectory, buildMap, options, buildTarget);
             if (buildManifest == null)
@@ -555,7 +564,7 @@ namespace AssetBundleBrowser.AssetBundleDataSource
             }
 
             // after build (without manifest)
-            if (withoutManifest)
+            if (Convert.ToBoolean(extdOptions & ExtendBuildAssetBundleOptions.WithoutManifest))
             {
                 bool completes = AssetBundleBuildTab.WithoutManifestFile(outputDirectory);
                 if (!completes) Debug.Log("<color=#FF0000>Error in process remove manifest.</color>");
@@ -563,7 +572,7 @@ namespace AssetBundleBrowser.AssetBundleDataSource
             }
 
             // after build (replace by hash)
-            if (replaceByHash)
+            if (Convert.ToBoolean(extdOptions & ExtendBuildAssetBundleOptions.ReplaceByHash))
             {
                 bool completes = AssetBundleBuildTab.ReplaceBundleNameByHash(outputDirectory);
                 if (!completes) Debug.Log("<color=#FF0000>Error in process replace by hash.</color>");
