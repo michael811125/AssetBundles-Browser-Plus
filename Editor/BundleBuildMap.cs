@@ -533,14 +533,13 @@ namespace AssetBundleBrowser.AssetBundleDataSource
         }
 
         /// <summary>
-        /// BuildAssetBundles (including remove manifest, replace by hash)
+        /// BuildAssetBundles (including Extend Options)
         /// </summary>
         /// <param name="outputDirectory"></param>
         /// <param name="buildMap"></param>
         /// <param name="options"></param>
         /// <param name="buildTarget"></param>
-        /// <param name="withoutManifest"></param>
-        /// <param name="replaceByHash"></param>
+        /// <param name="extdOptions"></param>
         /// <param name="onBuild"></param>
         /// <returns></returns>
         public static bool BuildAssetBundles(string outputDirectory, AssetBundleBuild[] buildMap, BuildAssetBundleOptions options, BuildTarget buildTarget, ExtendBuildAssetBundleOptions extdOptions, Action<string> onBuild)
