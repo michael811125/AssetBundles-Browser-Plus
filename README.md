@@ -81,6 +81,8 @@ When enabled sync feature can sync asset data to other BuildMap <font color=#FF0
 
 - ReplaceByHash : after build load manifest from build folder to read hash to replace.
 
+- Md5ForBundleName : after build get file name to make a md5 and to replace it.
+
 ![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/desc_img_9.png)
 
 # Installation
