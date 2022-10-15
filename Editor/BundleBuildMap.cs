@@ -1,4 +1,5 @@
 ﻿using AssetBundleBrowser.AssetBundleModel;
+using AssetBundleBrowser.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -546,10 +547,11 @@ namespace AssetBundleBrowser.AssetBundleDataSource
         {
             if (!Directory.Exists(outputDirectory)) Directory.CreateDirectory(outputDirectory);
 
-            // if use replaceByHash must remove AppendHashToAssetBundleName option (priority)
-            if (Convert.ToBoolean(extdOptions & ExtendBuildAssetBundleOptions.ReplaceByHash))
+            // check condition to remove AppendHashToAssetBundleName option (priority)
+            if (Convert.ToBoolean(options & BuildAssetBundleOptions.AppendHashToAssetBundleName))
             {
-                if (Convert.ToBoolean(options & BuildAssetBundleOptions.AppendHashToAssetBundleName))
+                if (Convert.ToBoolean(extdOptions & ExtendBuildAssetBundleOptions.ReplaceByHash) ||
+                    Convert.ToBoolean(extdOptions & ExtendBuildAssetBundleOptions.Md5ForBundleName))
                 {
                     options ^= BuildAssetBundleOptions.AppendHashToAssetBundleName;
                 }
@@ -576,6 +578,14 @@ namespace AssetBundleBrowser.AssetBundleDataSource
                 bool completes = AssetBundleBuildTab.ReplaceBundleNameByHash(outputDirectory);
                 if (!completes) Debug.Log("<color=#FF0000>Error in process replace by hash.</color>");
                 else Debug.Log($"<color=#60ffb0>Replace all bundle name by hash completes.</color>");
+            }
+
+            // after build (md5 for bundle name)
+            if (Convert.ToBoolean(extdOptions & ExtendBuildAssetBundleOptions.Md5ForBundleName))
+            {
+                bool completes = AssetBundleBuildTab.Md5ForBundleName(outputDirectory);
+                if (!completes) Debug.Log("<color=#FF0000>Error in process MD5 for bundle name.</color>");
+                else Debug.Log($"<color=#60ffb0>Replace all bundle name by MD5.</color>");
             }
 
             if (onBuild != null)

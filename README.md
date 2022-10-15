@@ -69,7 +69,9 @@ When enabled sync feature can sync asset data to other BuildMap <font color=#FF0
     // including extend options
     ExtendBuildAssetBundleOptions extdOptions = ExtendBuildAssetBundleOptions.None;
     extdOptions |= ExtendBuildAssetBundleOptions.WithoutManifest;
-    extdOptions |= ExtendBuildAssetBundleOptions.ReplaceByHash;
+    // choose one [ReplaceByHash] or [Md5ForBundleName]
+    // extdOptions |= ExtendBuildAssetBundleOptions.ReplaceByHash;
+    // extdOptions |= ExtendBuildAssetBundleOptions.Md5ForBundleName
     BundleBuildMap.BuildAssetBundles(outputDirectory, bundleBuildMap.GetBuildMap(), options, target, extdOptions, null);
 ```
 
