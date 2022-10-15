@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using AssetBundleBrowser.AssetBundleDataSource;
-using System.Linq;
+using AssetBundleBrowser.Utilities;
 
 namespace AssetBundleBrowser
 {
@@ -78,14 +78,16 @@ namespace AssetBundleBrowser
         {
             None,
             AppendHash,
-            ReplaceByHash
+            ReplaceByHash,
+            Md5ForName
         }
         GUIContent[] m_BundleNameOptions = {
             new GUIContent("None"),
             new GUIContent("Append Hash To Bundle Name"),
-            new GUIContent("Replace Bundle Name By Hash")
+            new GUIContent("Replace Bundle Name By Hash"),
+            new GUIContent("MD5 for Bundle Name")
         };
-        int[] m_BundleNameValues = { 0, 1, 2 };
+        int[] m_BundleNameValues = { 0, 1, 2, 3 };
 
         internal AssetBundleBuildTab()
         {
@@ -185,7 +187,7 @@ namespace AssetBundleBrowser
 
             m_TargetContent = new GUIContent("Build Target", "Choose target platform to build for.");
             m_CompressionContent = new GUIContent("Compression", "Choose no compress, standard (LZMA), or chunk based (LZ4)");
-            m_BundleNameContent = new GUIContent("Bundle Name", "Choose none, append hash, or replace by hash");
+            m_BundleNameContent = new GUIContent("Bundle Name", "Choose none, append hash, replace by hash, or md5 for bundle name");
 
             if (m_UserData.m_UseDefaultPath)
             {
@@ -399,6 +401,8 @@ namespace AssetBundleBrowser
                     opt |= BuildAssetBundleOptions.AppendHashToAssetBundleName;
                 else if (m_UserData.m_BundleNameOption == BundleNameOptions.ReplaceByHash)
                     extdOpt |= ExtendBuildAssetBundleOptions.ReplaceByHash;
+                else if (m_UserData.m_BundleNameOption == BundleNameOptions.Md5ForName)
+                    extdOpt |= ExtendBuildAssetBundleOptions.Md5ForBundleName;
 
                 // toggle options
                 foreach (var tog in m_ToggleData)
@@ -514,7 +518,7 @@ namespace AssetBundleBrowser
         }
 
         /// <summary>
-        /// Repace bundle name by hash (read hash from manifest to replace)
+        /// Replace bundle name by hash (read hash from manifest to replace)
         /// </summary>
         /// <param name="outputDirectory"></param>
         internal static bool ReplaceBundleNameByHash(string outputDirectory)
@@ -557,9 +561,54 @@ namespace AssetBundleBrowser
                     // skip process manifest & .manifest extension
                     if (bundleName.IndexOf(manifestName) != -1 || file.IndexOf(".manifest") != -1) continue;
 
+                    // file name (without extension)
                     string fileName = Path.GetFileNameWithoutExtension(file);
+                    // get hash from manifest
                     string hash = manifest.GetAssetBundleHash(bundleName).ToString();
+                    // replace it be new file
                     string newFile = file.Replace(fileName, hash);
+                    // copy override
+                    if (File.Exists(file)) File.Move(file, newFile);
+                }
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Make md5 by bundle file name and to replace it
+        /// </summary>
+        /// <returns></returns>
+        internal static bool Md5ForBundleName(string outputDirectory)
+        {
+            // outputDirectory last path name = manifestName
+            var firstIdx = outputDirectory.LastIndexOf("\\") == -1 ? outputDirectory.LastIndexOf("/") : outputDirectory.LastIndexOf("\\");
+            string manifestName = outputDirectory.Substring(firstIdx + 1, outputDirectory.Length - firstIdx - 1);
+
+            // search from all file to find menifest
+            string[] files = Directory.GetFiles(outputDirectory, "*.*", SearchOption.AllDirectories);
+
+            try
+            {
+                // replace all bundle file name by hash
+                foreach (var file in files)
+                {
+                    string bundleName = file.Replace(outputDirectory, string.Empty);
+                    bundleName = bundleName.Substring(1, bundleName.Length - 1);
+                    // skip process manifest & .manifest extension
+                    if (bundleName.IndexOf(manifestName) != -1 || file.IndexOf(".manifest") != -1) continue;
+
+                    // file name (without extension)
+                    string fileName = Path.GetFileNameWithoutExtension(file);
+                    // make a md5 by file name
+                    string md5 = BundleUtility.MakeMd5ForString(fileName);
+                    // replace it be new file
+                    string newFile = file.Replace(fileName, md5);
+                    // copy override
                     if (File.Exists(file)) File.Move(file, newFile);
                 }
             }
