@@ -1,5 +1,8 @@
 # Changelog (unofficial)
 
+## [1.8.1] - 2022-10-17
+- Fixed when choose replace by hash and md5 for bundle name options path issue ("\\" replace "/").
+
 ## [1.8.0] - 2022-10-15
 - Added BundleUtility for common methods, can find BundleUtility.MakeMd5ForString method when using AssetBundleBrowser.Utilities.
 - Added MD5 for bundle name option into ExtendBuildAssetBundleOptions (make a md5 by bundle name to replace it).

@@ -584,8 +584,8 @@ namespace AssetBundleBrowser.AssetBundleDataSource
             if (Convert.ToBoolean(extdOptions & ExtendBuildAssetBundleOptions.Md5ForBundleName))
             {
                 bool completes = AssetBundleBuildTab.Md5ForBundleName(outputDirectory);
-                if (!completes) Debug.Log("<color=#FF0000>Error in process MD5 for bundle name.</color>");
-                else Debug.Log($"<color=#60ffb0>Replace all bundle name by MD5.</color>");
+                if (!completes) Debug.Log("<color=#FF0000>Error in process Md5 for bundle name.</color>");
+                else Debug.Log($"<color=#60ffb0>Replace all bundle name by Md5.</color>");
             }
 
             if (onBuild != null)

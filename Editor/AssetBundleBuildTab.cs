@@ -85,7 +85,7 @@ namespace AssetBundleBrowser
             new GUIContent("None"),
             new GUIContent("Append Hash To Bundle Name"),
             new GUIContent("Replace Bundle Name By Hash"),
-            new GUIContent("MD5 for Bundle Name")
+            new GUIContent("Md5 For Bundle Name")
         };
         int[] m_BundleNameValues = { 0, 1, 2, 3 };
 
@@ -524,17 +524,18 @@ namespace AssetBundleBrowser
         internal static bool ReplaceBundleNameByHash(string outputDirectory)
         {
             // outputDirectory last path name = manifestName
-            var firstIdx = outputDirectory.LastIndexOf("\\") == -1 ? outputDirectory.LastIndexOf("/") : outputDirectory.LastIndexOf("\\");
-            string manifestName = outputDirectory.Substring(firstIdx + 1, outputDirectory.Length - firstIdx - 1);
+            outputDirectory = outputDirectory.Replace("\\", "/");
+            string[] pathArgs = outputDirectory.Split('/');
+            string manifestName = pathArgs[pathArgs.Length - 1];
 
             string manifestFullPath = string.Empty;
 
             // search from all file to find menifest
-            string[] files = Directory.GetFiles(outputDirectory, "*.*", SearchOption.AllDirectories);
+            string[] files = Directory.GetFiles(outputDirectory, "*.*", SearchOption.TopDirectoryOnly);
             foreach (var file in files)
             {
-                // check whole path (manifest will build in outputDirectory)
-                if (file.IndexOf(Path.Combine(outputDirectory, manifestName)) != -1)
+                // get manifest whole path (manifest will build in outputDirectory)
+                if (file.IndexOf(manifestName) != -1)
                 {
                     manifestFullPath = Path.GetFullPath(file);
                     break;
@@ -586,8 +587,9 @@ namespace AssetBundleBrowser
         internal static bool Md5ForBundleName(string outputDirectory)
         {
             // outputDirectory last path name = manifestName
-            var firstIdx = outputDirectory.LastIndexOf("\\") == -1 ? outputDirectory.LastIndexOf("/") : outputDirectory.LastIndexOf("\\");
-            string manifestName = outputDirectory.Substring(firstIdx + 1, outputDirectory.Length - firstIdx - 1);
+            outputDirectory = outputDirectory.Replace("\\", "/");
+            string[] pathArgs = outputDirectory.Split('/');
+            string manifestName = pathArgs[pathArgs.Length - 1];
 
             // search from all file to find menifest
             string[] files = Directory.GetFiles(outputDirectory, "*.*", SearchOption.AllDirectories);
