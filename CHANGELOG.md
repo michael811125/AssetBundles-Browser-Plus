@@ -1,5 +1,8 @@
 # Changelog (unofficial)
 
+## [1.8.2] - 2022-10-25
+- Fixed replace by hash and md5 for bundle name has file name match issue, use (bundleName == manifestName) instead.
+
 ## [1.8.1] - 2022-10-17
 - Fixed when choose replace by hash and md5 for bundle name options path issue ("\\" replace "/").
 

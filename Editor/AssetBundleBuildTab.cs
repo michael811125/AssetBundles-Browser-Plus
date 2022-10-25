@@ -530,8 +530,9 @@ namespace AssetBundleBrowser
 
             string manifestFullPath = string.Empty;
 
+            // get all files
+            string[] files = Directory.GetFiles(outputDirectory, "*.*", SearchOption.AllDirectories);
             // search from all file to find menifest
-            string[] files = Directory.GetFiles(outputDirectory, "*.*", SearchOption.TopDirectoryOnly);
             foreach (var file in files)
             {
                 // get manifest whole path (manifest will build in outputDirectory)
@@ -560,7 +561,7 @@ namespace AssetBundleBrowser
                     string bundleName = file.Replace(outputDirectory, string.Empty);
                     bundleName = bundleName.Substring(1, bundleName.Length - 1);
                     // skip process manifest & .manifest extension
-                    if (bundleName.IndexOf(manifestName) != -1 || file.IndexOf(".manifest") != -1) continue;
+                    if (bundleName == manifestName || file.IndexOf(".manifest") != -1) continue;
 
                     // file name (without extension)
                     string fileName = Path.GetFileNameWithoutExtension(file);
@@ -591,18 +592,17 @@ namespace AssetBundleBrowser
             string[] pathArgs = outputDirectory.Split('/');
             string manifestName = pathArgs[pathArgs.Length - 1];
 
-            // search from all file to find menifest
-            string[] files = Directory.GetFiles(outputDirectory, "*.*", SearchOption.AllDirectories);
-
             try
             {
+                // get all files
+                string[] files = Directory.GetFiles(outputDirectory, "*.*", SearchOption.AllDirectories);
                 // replace all bundle file name by hash
                 foreach (var file in files)
                 {
                     string bundleName = file.Replace(outputDirectory, string.Empty);
                     bundleName = bundleName.Substring(1, bundleName.Length - 1);
                     // skip process manifest & .manifest extension
-                    if (bundleName.IndexOf(manifestName) != -1 || file.IndexOf(".manifest") != -1) continue;
+                    if (bundleName == manifestName || file.IndexOf(".manifest") != -1) continue;
 
                     // file name (without extension)
                     string fileName = Path.GetFileNameWithoutExtension(file);
