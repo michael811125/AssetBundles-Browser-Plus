@@ -662,6 +662,12 @@ namespace AssetBundleBrowser
             return true;
         }
 
+        /// <summary>
+        /// Rename main manifest file
+        /// </summary>
+        /// <param name="outputDirectory"></param>
+        /// <param name="newName"></param>
+        /// <returns></returns>
         internal static bool RenameManifest(string outputDirectory, string newName)
         {
             // outputDirectory last path name = manifestName
@@ -680,16 +686,17 @@ namespace AssetBundleBrowser
                     bundleName = bundleName.Substring(1, bundleName.Length - 1);
 
                     // only process main manifest file
-                    if (bundleName == manifestName)
+                    if (bundleName == manifestName || bundleName == $"{manifestName}.manifest")
                     {
                         // file name (without extension)
                         string fileName = Path.GetFileNameWithoutExtension(file);
                         // replace it be new file (only replace last)
                         int startIndex = file.LastIndexOf(bundleName);
                         string newFile = file.Remove(startIndex, bundleName.Length).Insert(startIndex, newName);
+                        // specific process
+                        if (bundleName == $"{manifestName}.manifest") newFile = $@"{newFile}.manifest";
                         // copy override
                         if (File.Exists(file)) File.Move(file, newFile);
-                        break;
                     }
                 }
             }
