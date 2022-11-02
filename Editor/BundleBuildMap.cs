@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using UnityEditor;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 namespace AssetBundleBrowser.AssetBundleDataSource
 {
@@ -510,7 +511,7 @@ namespace AssetBundleBrowser.AssetBundleDataSource
                         string buildName = string.IsNullOrEmpty(this.customBuildMaps[i].buildName) ? this.customBuildMaps[i].bundleBuildMap.sourceName : this.customBuildMaps[i].buildName;
                         string outputDirectory = $"{info.outputDirectory}/{this.customBuildMaps[i].bundleBuildMap.sourceName}/{buildName}";
 
-                        if (BuildAssetBundles(outputDirectory, this.customBuildMaps[i].bundleBuildMap.GetBuildMap(), info.options, info.buildTarget, info.extdOptions, null))
+                        if (BuildAssetBundles(outputDirectory, this.customBuildMaps[i].bundleBuildMap.GetBuildMap(), info.options, info.buildTarget, info.extdOptions, info.renameManifest, info.onBuild))
                         {
                             stringBuilder.Append($"<color=#9DFF42>[Source Name: {this.customBuildMaps[i].bundleBuildMap.sourceName}, Build Name: {buildName}] Build Result => Success</color>\n");
                         }
@@ -527,7 +528,7 @@ namespace AssetBundleBrowser.AssetBundleDataSource
             }
             else
             {
-                return BuildAssetBundles(info.outputDirectory, this.GetBuildMap(), info.options, info.buildTarget, info.extdOptions, info.onBuild);
+                return BuildAssetBundles(info.outputDirectory, this.GetBuildMap(), info.options, info.buildTarget, info.extdOptions, info.renameManifest, info.onBuild);
             }
 
             return false;
@@ -541,9 +542,10 @@ namespace AssetBundleBrowser.AssetBundleDataSource
         /// <param name="options"></param>
         /// <param name="buildTarget"></param>
         /// <param name="extdOptions"></param>
+        /// <param name="renameManifest"></param>
         /// <param name="onBuild"></param>
         /// <returns></returns>
-        public static bool BuildAssetBundles(string outputDirectory, AssetBundleBuild[] buildMap, BuildAssetBundleOptions options, BuildTarget buildTarget, ExtendBuildAssetBundleOptions extdOptions, Action<string> onBuild)
+        public static bool BuildAssetBundles(string outputDirectory, AssetBundleBuild[] buildMap, BuildAssetBundleOptions options, BuildTarget buildTarget, ExtendBuildAssetBundleOptions extdOptions, string renameManifest = null, Action<string> onBuild = null)
         {
             if (!Directory.Exists(outputDirectory)) Directory.CreateDirectory(outputDirectory);
 
@@ -584,8 +586,16 @@ namespace AssetBundleBrowser.AssetBundleDataSource
             if (Convert.ToBoolean(extdOptions & ExtendBuildAssetBundleOptions.Md5ForBundleName))
             {
                 bool completes = AssetBundleBuildTab.Md5ForBundleName(outputDirectory);
-                if (!completes) Debug.Log("<color=#FF0000>Error in process Md5 for bundle name.</color>");
-                else Debug.Log($"<color=#60ffb0>Replace all bundle name by Md5.</color>");
+                if (!completes) Debug.Log("<color=#FF0000>Error in process md5 for bundle name.</color>");
+                else Debug.Log($"<color=#60ffb0>Replace all bundle name by md5.</color>");
+            }
+
+            // after build (rename main manifest file)
+            if (!string.IsNullOrEmpty(renameManifest))
+            {
+                bool completes = AssetBundleBuildTab.RenameManifest(outputDirectory, renameManifest);
+                if (!completes) Debug.Log("<color=#FF0000>Error in process rename manifest.</color>");
+                else Debug.Log($"<color=#60ffb0>Rename manifest to \"{renameManifest}\".</color>");
             }
 
             if (onBuild != null)
@@ -599,7 +609,7 @@ namespace AssetBundleBrowser.AssetBundleDataSource
             return true;
         }
 
-        public static bool BuildAssetBundles(string outputDirectory, AssetBundleBuild[] buildMap, BuildAssetBundleOptions options, BuildTarget buildTarget, Action<string> onBuild)
+        public static bool BuildAssetBundles(string outputDirectory, AssetBundleBuild[] buildMap, BuildAssetBundleOptions options, BuildTarget buildTarget, Action<string> onBuild = null)
         {
             if (!Directory.Exists(outputDirectory)) Directory.CreateDirectory(outputDirectory);
 

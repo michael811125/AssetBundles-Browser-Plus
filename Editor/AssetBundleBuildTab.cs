@@ -21,7 +21,6 @@ namespace AssetBundleBrowser
         [SerializeField]
         private Vector2 m_ScrollPosition;
 
-
         class ToggleData
         {
             internal ToggleData(
@@ -56,6 +55,7 @@ namespace AssetBundleBrowser
         List<ToggleData> m_ToggleData;
         ToggleData m_ForceRebuild;
         ToggleData m_CopyToStreaming;
+        ToggleData m_RenameManifest;
         GUIContent m_TargetContent;
         GUIContent m_CompressionContent;
         GUIContent m_BundleNameContent;
@@ -184,6 +184,12 @@ namespace AssetBundleBrowser
                 "Copy to StreamingAssets",
                 "After build completes, will copy all build content to " + m_streamingPath + " for use in stand-alone player.",
                 m_UserData.m_OnToggles);
+            m_RenameManifest = new ToggleData(
+                false,
+                "Rename Manifest File",
+                "After build completes, will rename main manifest file",
+                m_UserData.m_OnToggles);
+
 
             m_TargetContent = new GUIContent("Build Target", "Choose target platform to build for.");
             m_CompressionContent = new GUIContent("Compression", "Choose no compress, standard (LZMA), or chunk based (LZ4)");
@@ -277,6 +283,33 @@ namespace AssetBundleBrowser
                         m_UserData.m_OnToggles.Remove(m_CopyToStreaming.content.text);
                     m_CopyToStreaming.state = newState;
                 }
+                EditorGUILayout.BeginHorizontal();
+                newState = GUILayout.Toggle(
+                  m_RenameManifest.state,
+                  m_RenameManifest.content);
+                if (newState != m_RenameManifest.state)
+                {
+                    if (newState)
+                    {
+                        m_UserData.m_OnToggles.Add(m_RenameManifest.content.text);
+
+                    }
+                    else
+                        m_UserData.m_OnToggles.Remove(m_RenameManifest.content.text);
+                    m_RenameManifest.state = newState;
+                }
+                EditorGUILayout.Space();
+                if (newState)
+                {
+                    var newManifestName = EditorGUILayout.TextField("", m_UserData.m_ManifestName);
+                    if (!System.String.IsNullOrEmpty(newManifestName) && newManifestName != m_UserData.m_ManifestName)
+                    {
+                        m_UserData.m_ManifestName = newManifestName;
+                    }
+                }
+                GUILayout.FlexibleSpace();
+                EditorGUILayout.EndHorizontal();
+
             }
 
             // advanced options
@@ -347,6 +380,7 @@ namespace AssetBundleBrowser
                 return;
             }
 
+            string renameManifest = string.Empty;
             if (AssetBundleModel.Model.DataSource.CanSpecifyBuildOutputDirectory)
             {
                 if (string.IsNullOrEmpty(m_UserData.m_OutputPath))
@@ -383,6 +417,11 @@ namespace AssetBundleBrowser
                 }
                 if (!Directory.Exists(m_UserData.m_OutputPath))
                     Directory.CreateDirectory(m_UserData.m_OutputPath);
+
+                if (m_RenameManifest.state)
+                {
+                    renameManifest = m_UserData.m_ManifestName;
+                }
             }
 
             BuildAssetBundleOptions opt = BuildAssetBundleOptions.None;
@@ -417,6 +456,7 @@ namespace AssetBundleBrowser
             ABBuildInfo buildInfo = new ABBuildInfo();
 
             buildInfo.outputDirectory = m_UserData.m_OutputPath;
+            buildInfo.renameManifest = renameManifest;
             buildInfo.options = opt;
             buildInfo.extdOptions = extdOpt;
             buildInfo.buildTarget = (BuildTarget)m_UserData.m_BuildTarget;
@@ -622,6 +662,45 @@ namespace AssetBundleBrowser
             return true;
         }
 
+        internal static bool RenameManifest(string outputDirectory, string newName)
+        {
+            // outputDirectory last path name = manifestName
+            outputDirectory = outputDirectory.Replace("\\", "/");
+            string[] pathArgs = outputDirectory.Split('/');
+            string manifestName = pathArgs[pathArgs.Length - 1];
+
+            try
+            {
+                // get all files
+                string[] files = Directory.GetFiles(outputDirectory, "*.*", SearchOption.AllDirectories);
+                // replace all bundle file name by hash
+                foreach (var file in files)
+                {
+                    string bundleName = file.Replace(outputDirectory, string.Empty);
+                    bundleName = bundleName.Substring(1, bundleName.Length - 1);
+
+                    // only process main manifest file
+                    if (bundleName == manifestName)
+                    {
+                        // file name (without extension)
+                        string fileName = Path.GetFileNameWithoutExtension(file);
+                        // replace it be new file (only replace last)
+                        int startIndex = file.LastIndexOf(bundleName);
+                        string newFile = file.Remove(startIndex, bundleName.Length).Insert(startIndex, newName);
+                        // copy override
+                        if (File.Exists(file)) File.Move(file, newFile);
+                        break;
+                    }
+                }
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         //Note: this is the provided BuildTarget enum with some entries removed as they are invalid in the dropdown
         internal enum ValidBuildTarget
         {
@@ -668,6 +747,7 @@ namespace AssetBundleBrowser
             internal BundleNameOptions m_BundleNameOption = BundleNameOptions.None;
             internal string m_OutputPath = string.Empty;
             internal bool m_UseDefaultPath = true;
+            internal string m_ManifestName = string.Empty;
         }
     }
 

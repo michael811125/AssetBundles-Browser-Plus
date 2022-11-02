@@ -63,6 +63,15 @@ namespace AssetBundleBrowser.AssetBundleDataSource
             set { m_extdOptions = value; }
         }
         private ExtendBuildAssetBundleOptions m_extdOptions;
+        /// <summary>
+        /// Rename main manifest file
+        /// </summary>
+        public string renameManifest
+        {
+            get { return m_renameManifest; }
+            set { m_renameManifest = value; }
+        }
+        private string m_renameManifest;
     }
 
     /// <summary>

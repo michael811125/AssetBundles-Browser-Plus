@@ -63,17 +63,28 @@ When enabled sync feature can sync asset data to other BuildMap <font color=#FF0
     // LZ4
     BuildAssetBundleOptions options = BuildAssetBundleOptions.ChunkBasedCompression;
     
-    // regular
-    BundleBuildMap.BuildAssetBundles(outputDirectory, bundleBuildMap.GetBuildMap(), options, target, null);
-    
     // including extend options
     ExtendBuildAssetBundleOptions extdOptions = ExtendBuildAssetBundleOptions.None;
     extdOptions |= ExtendBuildAssetBundleOptions.WithoutManifest;
     // choose one [ReplaceByHash] or [Md5ForBundleName]
     // extdOptions |= ExtendBuildAssetBundleOptions.ReplaceByHash;
     // extdOptions |= ExtendBuildAssetBundleOptions.Md5ForBundleName
-    BundleBuildMap.BuildAssetBundles(outputDirectory, bundleBuildMap.GetBuildMap(), options, target, extdOptions, null);
+	
+    // rename manifest (if set it empty or null will not to do)
+    string renameManifest = "myManifest";
+	
+    // execute regular build
+    BundleBuildMap.BuildAssetBundles(outputDirectory, bundleBuildMap.GetBuildMap(), options, target);
+	
+    // execute extend build
+    BundleBuildMap.BuildAssetBundles(outputDirectory, bundleBuildMap.GetBuildMap(), options, target, extdOptions, renameManifest);
 ```
+
+### Build Extension
+
+- Rename Manifest : after build completes, will rename main manifest file.
+
+![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/desc_img_10.png)
 
 ### Advenced Settings Extension
 
@@ -82,6 +93,8 @@ When enabled sync feature can sync asset data to other BuildMap <font color=#FF0
 - ReplaceByHash : after build load manifest from build folder to read hash to replace.
 
 - Md5ForBundleName : after build get file name to make a md5 and to replace it.
+
+**※Remark** : If use custom build tool for extend option **ReplaceByHash** or **Md5ForBundleName** choose one.
 
 ![](https://github.com/michael811125/AssetBundles-Browser-Plus/blob/master/Documentation/images/desc_img_9.png)
 
