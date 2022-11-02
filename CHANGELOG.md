@@ -1,5 +1,8 @@
 # Changelog (unofficial)
 
+## [1.9.1] - 2022-11-02
+- Fixed rename manifest doesn't process MainManifest.manifest rename issue.
+
 ## [1.9.0] - 2022-11-02
 - Added Rename Manifest feature (optional).
 - Modified BundleBuildMap.BuildAssetBundles() static method params (added renameManifest param).
