@@ -1,5 +1,9 @@
 # Changelog (unofficial)
 
+## [1.9.0] - 2022-11-02
+- Added Rename Manifest feature (optional).
+- Modified BundleBuildMap.BuildAssetBundles() static method params (added renameManifest param).
+
 ## [1.8.2] - 2022-10-25
 - Fixed replace by hash and md5 for bundle name has file name match issue, use (bundleName == manifestName) instead.
 
